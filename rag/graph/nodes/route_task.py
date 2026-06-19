@@ -18,6 +18,7 @@ import openai
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from rag.config.settings import get_llm
+from rag.graph.citation_check import Validate_Citations
 from rag.graph.nodes.orchestrator import Run_Orchestrator
 from rag.graph.nodes.route_people import Route_People_Node, _SUPPLEMENT as _PEOPLE_SUPPLEMENT
 from rag.graph.nodes.route_timeline import Route_Timeline_Node, _SUPPLEMENT as _TIMELINE_SUPPLEMENT
@@ -144,6 +145,7 @@ def Synthesize_Answer(
     """用 LLM 综合 chunk 内容（及可选的结构化数据）回答用户问题。
 
     根据 query_kind 选择 prompt：fact 严格逐句引用；analysis/multi_enum 允许推断。
+    生成后校验答案里的 [chunk_id=N] 是否全部来自传入的 chunks，校验不过打日志报警并拒答。
 
     Args:
         query:              用户原始问题。
@@ -189,6 +191,12 @@ def Synthesize_Answer(
     answer = response.content.strip() if response.content else ""
     if not answer:
         return "（LLM 返回了空响应，无法给出结论）"
+
+    valid_chunk_ids = {c["chunk_id"] for c in chunks if isinstance(c.get("chunk_id"), int)}
+    error = Validate_Citations(answer, "chunk_id", valid_chunk_ids)
+    if error is not None:
+        print(f"\n[Citation 报警] Synthesize_Answer：{error}")
+        return "根据现有资料，无法回答此问题。"
 
     return answer
 

@@ -22,6 +22,7 @@ from pathlib import Path
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 
 from rag.config.settings import get_llm
+from rag.graph.citation_check import Validate_Citations
 from rag.retrieval.tools.people_tools import CHECK_CHUNK_TOOL
 from rag.retrieval.tools.timeline_tools import TIMELINE_TOOLS
 
@@ -106,6 +107,31 @@ def _Log_Agent_Result(conclusion: str) -> None:
         print("\n[Timeline] LLM 返回了空响应，无法给出结论")
 
 
+_CITATION_REJECT = "根据现有资料，无法回答此部分。"
+
+
+def _Ids_From_Result(tool_result: object) -> set[int]:
+    """从 event_search 返回结果里收集合法 event_id，供答案引用校验用。"""
+
+    if isinstance(tool_result, list):
+        return {
+            e["event_id"] for e in tool_result
+            if isinstance(e, dict) and isinstance(e.get("event_id"), int)
+        }
+    return set()
+
+
+def _Guard_Citations(text: str, valid_ids: set[int], step: str) -> str:
+    """校验答案里的 event_id 引用，不合法就打日志报警并改成拒答文案。"""
+
+    error = Validate_Citations(text, "event_id", valid_ids)
+    if error is None:
+        return text
+
+    print(f"\n[Citation 报警] {step}：{error}")
+    return _CITATION_REJECT
+
+
 def _Parse_Text_Tool_Call(content: str) -> tuple[str, dict] | None:
     """LLM 未触发 native tool call 时，尝试从文本 JSON 中解析工具名和参数。"""
     text = (content or "").strip()
@@ -153,8 +179,9 @@ def Route_Timeline_Node(task_text: str) -> str | None:
     if not response.tool_calls:
         parsed = _Parse_Text_Tool_Call(response.content)
         if not parsed:
-            _Log_Agent_Result(response.content)
-            return response.content
+            text = _Guard_Citations(response.content, set(), "未调用工具直接作答")
+            _Log_Agent_Result(text)
+            return text
         print("[Timeline] LLM 未触发 native tool call，从文本 JSON 降级解析。")
         tool_name, tool_args = parsed
         response.tool_calls = [{"name": tool_name, "args": tool_args, "id": "text_fallback"}]
@@ -166,6 +193,8 @@ def Route_Timeline_Node(task_text: str) -> str | None:
 
     _Log_Tool_Used(tool_name, tool_args)
     _Log_Tool_Result(tool_result)
+
+    valid_event_ids = _Ids_From_Result(tool_result)
 
     messages.append(response)
     messages.append(
@@ -188,6 +217,9 @@ def Route_Timeline_Node(task_text: str) -> str | None:
     if judgment.tool_calls and any(tc["name"] == "check_chunk" for tc in judgment.tool_calls):
         partial = _Generate_Partial(messages)
         if partial and not partial.startswith("无"):
+            partial = _Guard_Citations(partial, valid_event_ids, "partial 摘要")
+            if partial == _CITATION_REJECT:
+                return _CITATION_REJECT
             print("\n[Agent Result] 工具结果不完整，将与 chunk 合并回答。")
             return _SUPPLEMENT + partial
         print("\n[Agent Result] 工具无结果，回退至 chunk 兜底检索。")
@@ -198,5 +230,6 @@ def Route_Timeline_Node(task_text: str) -> str | None:
         print("\n[Agent Result] LLM 返空响应，强制回退至 chunk 兜底检索。")
         return None
 
-    _Log_Agent_Result(judgment.content)
-    return judgment.content
+    text = _Guard_Citations(judgment.content, valid_event_ids, "第二次判断直接给出答案")
+    _Log_Agent_Result(text)
+    return text

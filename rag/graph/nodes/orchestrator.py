@@ -22,6 +22,7 @@ from pathlib import Path
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from rag.config.settings import get_llm
+from rag.graph.citation_check import Extract_Cited_Ids, Validate_Citations
 
 
 _RESOLVE_SKILL_PATH = Path(__file__).resolve().parents[2] / "agent" / "skills" / "resolve_references.md"
@@ -213,7 +214,12 @@ def _Execute_Task(parent: dict, resolved_text: str, history: list, top_k: int = 
 
 
 def _Synthesize_Final_Answer(refined_query: str, pool: dict[str, list[TaskResult]]) -> str:
-    """读结果池，调 LLM 合成最终回答并返回，答案不打印到日志。"""
+    """读结果池，调 LLM 合成最终回答并返回，答案不打印到日志。
+
+    合成规则只允许原样复述子任务答案里已有的引用锚点，不允许新增。
+    生成后逐字段校验最终答案的 [people_id=N] / [event_id=N] / [chunk_id=N]
+    是否全部来自结果池里子任务答案本身已出现过的 id，校验不过打日志报警并拒答。
+    """
 
     parts:   list[str] = []
     blocked: list[str] = []
@@ -242,5 +248,12 @@ def _Synthesize_Final_Answer(refined_query: str, pool: dict[str, list[TaskResult
     ])
 
     answer = response.content.strip() if response.content else "（LLM 返回了空响应）"
+
+    for field in ("people_id", "event_id", "chunk_id"):
+        valid_ids = Extract_Cited_Ids(evidence_text, field)
+        error = Validate_Citations(answer, field, valid_ids)
+        if error is not None:
+            print(f"\n[Citation 报警] _Synthesize_Final_Answer：{error}")
+            return "根据现有资料，无法生成可靠回答。"
 
     return answer

@@ -17,6 +17,61 @@ _DATA_PATH = Path(__file__).resolve().parents[2] / "data" / "people_timeline" / 
 # 全局缓存，避免每次检索都重新读文件
 _people_cache: list[dict] | None = None
 
+# era_filter 合法枚举值，对应 people_tools.py 文档里允许 LLM 填写的年号表
+_ERA_ENUM = {
+    "至正", "洪武", "建文", "永乐", "洪熙", "宣德", "正统", "景泰", "天顺",
+    "成化", "弘治", "正德", "嘉靖", "隆庆", "万历", "泰昌", "天启", "崇祯",
+    "大义", "天元", "天历", "天祐", "太平",
+}
+
+# primary_filter 合法枚举值，对应 people_tools.py 文档里的 13 个身份大类
+_PRIMARY_ENUM = {
+    "皇帝", "明朝武将", "文臣", "宦官", "皇室", "反叛势力",
+    "势力", "清", "蒙古草原", "朝鲜", "日本", "外国", "社会人员",
+}
+
+
+def _Validate_Era_Filter(era_filter: list[str] | None) -> list[str] | None:
+    """剔除不在合法年号枚举表里的取值，打日志报警，避免非法值悄悄参与过滤。
+
+    LLM 偶尔会填出表外的年号（拼错、用了清朝年号等），这类值不报错也不会
+    被正则命中，过去只会安静地查不到东西，分不清是"真没有"还是"参数填错了"。
+
+    Args:
+        era_filter: LLM 填写的年号列表，可能为 None。
+    Returns:
+        剔除非法值后的列表；全部非法或原本为空时返回 None（跳过年代过滤）。
+    """
+
+    if not era_filter:
+        return era_filter
+
+    bad = [e for e in era_filter if e not in _ERA_ENUM]
+    if bad:
+        print(f"[参数校验报警] era_filter 出现非法枚举值 {bad}，已剔除，不参与过滤")
+
+    good = [e for e in era_filter if e in _ERA_ENUM]
+    return good or None
+
+
+def _Validate_Primary_Filter(primary_filter: str | None) -> str | None:
+    """校验 primary_filter 是否在合法身份大类枚举表里，不在表里就打日志报警并忽略。
+
+    Args:
+        primary_filter: LLM 填写的身份大类，可能为 None。
+    Returns:
+        合法则原样返回；非法返回 None（跳过身份过滤）。
+    """
+
+    if primary_filter is None:
+        return None
+
+    if primary_filter not in _PRIMARY_ENUM:
+        print(f"[参数校验报警] primary_filter 出现非法枚举值 {primary_filter!r}，已忽略，不参与过滤")
+        return None
+
+    return primary_filter
+
 
 def _Load_Store() -> list[dict]:
     """加载人物数据，首次调用后缓存到模块全局变量，后续直接返回缓存。
@@ -70,6 +125,9 @@ def People_Search(
         命中人物档案列表，每条含 name / aliases / primary_identity /
         secondary_identity / era / roles / events / summary，不含 relationships 和 source_chunks。
     """
+
+    era_filter     = _Validate_Era_Filter(era_filter)
+    primary_filter = _Validate_Primary_Filter(primary_filter)
 
     candidates = _Load_Store()
 

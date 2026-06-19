@@ -22,6 +22,7 @@ from pathlib import Path
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 
 from rag.config.settings import get_llm
+from rag.graph.citation_check import Validate_Citations
 from rag.retrieval.tools.people_tools import CHECK_CHUNK_TOOL, PEOPLE_TOOLS
 
 
@@ -145,6 +146,55 @@ def _Log_Agent_Result(conclusion: str) -> None:
         print("\n[People] LLM 返回了空响应，无法给出结论")
 
 
+_CITATION_REJECT = "根据现有资料，无法回答此部分。"
+
+
+def _Ids_From_Result(tool_name: str, tool_result: object) -> set[int]:
+    """从工具执行结果里收集合法 people_id，供答案引用校验用。
+
+    people_search 返回列表，每条记录自带 people_id；
+    relationships_search 返回字典，只有查询主体自己的 people_id 合法，
+    relationships[].target 是人名，没有独立 id，不计入合法集合。
+
+    Args:
+        tool_name: 刚执行完的工具名。
+        tool_result: 该工具的原始返回值。
+    Returns:
+        本次工具调用贡献的合法 people_id 集合。
+    """
+
+    if tool_name == "people_search" and isinstance(tool_result, list):
+        return {
+            r["people_id"] for r in tool_result
+            if isinstance(r, dict) and isinstance(r.get("people_id"), int)
+        }
+
+    if tool_name == "relationships_search" and isinstance(tool_result, dict):
+        pid = tool_result.get("people_id")
+        return {pid} if isinstance(pid, int) else set()
+
+    return set()
+
+
+def _Guard_Citations(text: str, valid_ids: set[int], step: str) -> str:
+    """校验答案里的 people_id 引用，不合法就打日志报警并改成拒答文案。
+
+    Args:
+        text: 待校验的答案文本。
+        valid_ids: 当前已执行的工具调用贡献的合法 people_id 集合。
+        step: 当前所在步骤名，仅用于日志定位。
+    Returns:
+        校验通过原样返回 text；不通过返回固定拒答文案。
+    """
+
+    error = Validate_Citations(text, "people_id", valid_ids)
+    if error is None:
+        return text
+
+    print(f"\n[Citation 报警] {step}：{error}")
+    return _CITATION_REJECT
+
+
 def Route_People_Node(task_text: str) -> str | None:
     """People 路由节点主函数。
 
@@ -177,8 +227,9 @@ def Route_People_Node(task_text: str) -> str | None:
     if not response.tool_calls:
         parsed = _Parse_Text_Tool_Call(response.content)
         if not parsed:
-            _Log_Agent_Result(response.content)
-            return response.content
+            text = _Guard_Citations(response.content, set(), "未调用工具直接作答")
+            _Log_Agent_Result(text)
+            return text
         print("[People] LLM 未触发 native tool call，从文本 JSON 降级解析。")
         tool_name, tool_args = parsed
         response.tool_calls = [{"name": tool_name, "args": tool_args, "id": "text_fallback"}]
@@ -190,6 +241,8 @@ def Route_People_Node(task_text: str) -> str | None:
 
     _Log_Tool_Used(tool_name, tool_args)
     _Log_Tool_Result(tool_result)
+
+    valid_people_ids = _Ids_From_Result(tool_name, tool_result)
 
     messages.append(response)
     messages.append(
@@ -215,13 +268,17 @@ def Route_People_Node(task_text: str) -> str | None:
 
     # 直接给出文本答案
     if not judgment.tool_calls:
-        _Log_Agent_Result(judgment.content)
-        return judgment.content
+        text = _Guard_Citations(judgment.content, valid_people_ids, "第二次判断直接给出答案")
+        _Log_Agent_Result(text)
+        return text
 
     # 调用 check_chunk：提取 partial 后交上游合并 chunk
     if any(tc["name"] == "check_chunk" for tc in judgment.tool_calls):
         partial = _Generate_Partial(messages)
         if partial and not partial.startswith("无"):
+            partial = _Guard_Citations(partial, valid_people_ids, "partial 摘要（首次工具后）")
+            if partial == _CITATION_REJECT:
+                return _CITATION_REJECT
             print("\n[Agent Result] 工具结果不完整，将与 chunk 合并回答。")
             return _SUPPLEMENT + partial
         print("\n[Agent Result] 工具无结果，回退至 chunk 兜底检索。")
@@ -237,6 +294,8 @@ def Route_People_Node(task_text: str) -> str | None:
     _Log_Tool_Used(retry_name, retry_args)
     _Log_Tool_Result(retry_result)
 
+    valid_people_ids = valid_people_ids | _Ids_From_Result(retry_name, retry_result)
+
     messages.append(judgment)
     messages.append(
         ToolMessage(
@@ -251,10 +310,14 @@ def Route_People_Node(task_text: str) -> str | None:
     if final.tool_calls and any(tc["name"] == "check_chunk" for tc in final.tool_calls):
         partial = _Generate_Partial(messages)
         if partial and not partial.startswith("无"):
+            partial = _Guard_Citations(partial, valid_people_ids, "partial 摘要（第二次工具后）")
+            if partial == _CITATION_REJECT:
+                return _CITATION_REJECT
             print("\n[Agent Result] 两次工具结果不完整，将与 chunk 合并回答。")
             return _SUPPLEMENT + partial
         print("\n[Agent Result] 两次工具均无结果，回退至 chunk 兜底检索。")
         return None
 
-    _Log_Agent_Result(final.content)
-    return final.content
+    text = _Guard_Citations(final.content, valid_people_ids, "第三次最终判断")
+    _Log_Agent_Result(text)
+    return text

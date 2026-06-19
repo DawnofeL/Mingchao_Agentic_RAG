@@ -71,13 +71,17 @@ def Event_Search(
 
     # era 过滤：过滤掉非法枚举值，剩余年号 OR 匹配 era 字段
     if era is not None:
+        bad_eras = [e for e in era if e not in _ERA_ENUM]
+        if bad_eras:
+            print(f"[参数校验报警] era 出现非法枚举值 {bad_eras}，已剔除，不参与过滤")
+
         valid_eras = [e for e in era if e in _ERA_ENUM]
-        if not valid_eras:
-            return []
-        candidates = [
-            e for e in candidates
-            if any(_Regex_Match(e.get("era", ""), era_val) for era_val in valid_eras)
-        ]
+        # 全部非法时按"未传 era"处理，不该让一个填错的年号把其它合法参数也一并拖空
+        if valid_eras:
+            candidates = [
+                e for e in candidates
+                if any(_Regex_Match(e.get("era", ""), era_val) for era_val in valid_eras)
+            ]
 
     # year 过滤：任意年份精确命中即保留（OR）
     if year is not None:
