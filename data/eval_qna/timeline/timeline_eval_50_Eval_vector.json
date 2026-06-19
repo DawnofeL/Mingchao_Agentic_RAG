@@ -1,0 +1,1354 @@
+[
+  {
+    "qna_id": 1,
+    "sub_type": "timeline",
+    "question": "至正十一年至至正十三年，反元浪潮和朱元璋起步阶段可串起哪些大事？",
+    "keypoints": [
+      {
+        "answer": "韩山童刘福通起义",
+        "score": 1
+      },
+      {
+        "answer": "徐寿辉建立天完政权",
+        "score": 0
+      },
+      {
+        "answer": "朱元璋投奔郭子兴",
+        "score": 0
+      },
+      {
+        "answer": "朱元璋与马秀英成婚",
+        "score": 0
+      },
+      {
+        "answer": "朱元璋定远扩军",
+        "score": 0
+      },
+      {
+        "answer": "朱元璋攻克滁州",
+        "score": 1
+      },
+      {
+        "answer": "高邮之战",
+        "score": 1
+      }
+    ],
+    "llm_results": "至正十一年，韩山童、刘福通在颖州起义，徐寿辉亦于同年起义[chunk_id=7,18]。至正十三年，张士诚起兵攻占泰州、兴化等地并在高邮建都称王，随后抵御了元军进攻[chunk_id=18]。同年，朱元璋决定攻击并一举攻占滁州，招纳李善长为文书，其侄子朱文正、姐夫李贞和外甥李文忠也前来投奔[chunk_id=13]。",
+    "score": {
+      "0": 4,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 2,
+    "sub_type": "timeline",
+    "question": "洪武元年至三年，开国、北伐、朝中人事、民生取士各线可串起哪些大事？",
+    "keypoints": [
+      {
+        "answer": "明朝建立",
+        "score": 0
+      },
+      {
+        "answer": "明军攻克大都",
+        "score": 0
+      },
+      {
+        "answer": "太原夜袭战",
+        "score": 0
+      },
+      {
+        "answer": "李彬案与刘基失势",
+        "score": 0
+      },
+      {
+        "answer": "常遇春攻克上都",
+        "score": 0
+      },
+      {
+        "answer": "定西之战",
+        "score": 0
+      },
+      {
+        "answer": "李文忠攻克应昌",
+        "score": 0
+      },
+      {
+        "answer": "朱元璋推行垦荒免税",
+        "score": 0
+      },
+      {
+        "answer": "明朝开科举",
+        "score": 0
+      },
+      {
+        "answer": "刘基被迫致仕",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 10,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 3,
+    "sub_type": "timeline",
+    "question": "建文元年削藩危机爆开后，北平一线先后落下哪批关键行动？",
+    "keypoints": [
+      {
+        "answer": "建文帝削藩",
+        "score": 0
+      },
+      {
+        "answer": "朱棣装疯避祸",
+        "score": 0
+      },
+      {
+        "answer": "燕王府诛张昺谢贵",
+        "score": 0
+      },
+      {
+        "answer": "朱棣夺取北平",
+        "score": 0
+      },
+      {
+        "answer": "朱棣起兵靖难",
+        "score": 0
+      },
+      {
+        "answer": "怀来之战",
+        "score": 0
+      },
+      {
+        "answer": "雄县之战",
+        "score": 0
+      },
+      {
+        "answer": "真定之战",
+        "score": 0
+      },
+      {
+        "answer": "朱棣挟持宁王朱权",
+        "score": 0
+      },
+      {
+        "answer": "北平保卫战",
+        "score": 0
+      },
+      {
+        "answer": "郑村坝之战",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 11,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 4,
+    "sub_type": "timeline",
+    "question": "永乐前五年，修书、内阁用人、储位宗藩、建文寻访、远航与安南事务留下哪些大事？",
+    "keypoints": [
+      {
+        "answer": "《永乐大典》开馆编修",
+        "score": 0
+      },
+      {
+        "answer": "设立内阁",
+        "score": 1
+      },
+      {
+        "answer": "姚广孝复名授官",
+        "score": 0
+      },
+      {
+        "answer": "朱高炽被立为太子",
+        "score": 0
+      },
+      {
+        "answer": "郑和首次下西洋",
+        "score": 1
+      },
+      {
+        "answer": "郑和处理爪哇误杀事件",
+        "score": 0
+      },
+      {
+        "answer": "朱棣开始削夺诸王权力",
+        "score": 0
+      },
+      {
+        "answer": "陈天平返安被伏杀",
+        "score": 0
+      },
+      {
+        "answer": "胡濙受命秘密寻访建文帝",
+        "score": 0
+      },
+      {
+        "answer": "《永乐大典》编成",
+        "score": 1
+      },
+      {
+        "answer": "解缙贬谪广西",
+        "score": 0
+      },
+      {
+        "answer": "郑和擒斩陈祖义",
+        "score": 1
+      },
+      {
+        "answer": "明军平定安南",
+        "score": 1
+      }
+    ],
+    "llm_results": "永乐五年十一月，《永乐大典》修成[chunk_id=283]。永乐初年朱棣任命解缙等七人为殿阁大学士组成首任内阁参与机务[chunk_id=333]。永乐五年五月明军平定安南，六月改安南为交趾并设置布政使司[chunk_id=312]。永乐五年九月郑和完成远航回京，朱棣下令当众斩杀海盗陈祖义[chunk_id=302]。此次远航未找到建文帝[chunk_id=302]。现有资料未提及永乐前五年储位宗藩相关大事。",
+    "score": {
+      "0": 8,
+      "1": 5
+    }
+  },
+  {
+    "qna_id": 5,
+    "sub_type": "timeline",
+    "question": "从永乐二十二年到洪熙元年，皇位交接、旧案平反、内阁调整和谏诤可归入哪一组大事？",
+    "keypoints": [
+      {
+        "answer": "朱棣北征病逝榆木川",
+        "score": 0
+      },
+      {
+        "answer": "朱高炽即位",
+        "score": 0
+      },
+      {
+        "answer": "朱高炽平反建文旧臣",
+        "score": 0
+      },
+      {
+        "answer": "三杨入阁掌机务",
+        "score": 0
+      },
+      {
+        "answer": "朱高炽去世",
+        "score": 0
+      },
+      {
+        "answer": "朱瞻基即位",
+        "score": 0
+      },
+      {
+        "answer": "李时勉廷谏仁宗",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 7,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 6,
+    "sub_type": "timeline",
+    "question": "1344年，朱元璋的人生轨迹发生了什么关键转折？",
+    "keypoints": [
+      {
+        "answer": "朱元璋家破入皇觉寺",
+        "score": 0
+      }
+    ],
+    "llm_results": "1344年，朱元璋结束放牛生涯，开始做和尚并外出讨饭[chunk_id=1]。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 7,
+    "sub_type": "timeline",
+    "question": "常遇春率先登岸破阵时，朱元璋夺下的是哪处江岸要地？",
+    "keypoints": [
+      {
+        "answer": "采石",
+        "score": 1
+      }
+    ],
+    "llm_results": "采石[chunk_id=24]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 8,
+    "sub_type": "timeline",
+    "question": "朱元璋正式称帝建明，发生在何处？",
+    "keypoints": [
+      {
+        "answer": "应天",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱元璋正式称帝建明发生在应天[chunk_id=74]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 9,
+    "sub_type": "timeline",
+    "question": "永乐五年，南京文渊阁完成的巨型修书大事是什么？",
+    "keypoints": [
+      {
+        "answer": "《永乐大典》编成",
+        "score": 1
+      }
+    ],
+    "llm_results": "永乐五年南京文渊阁完成的巨型修书大事是《永乐大典》[chunk_id=283]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 10,
+    "sub_type": "timeline",
+    "question": "朱高煦把多年夺位野心公开化时，起兵地点在哪里？",
+    "keypoints": [
+      {
+        "answer": "乐安",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱高煦把多年夺位野心公开化时的起兵地点在山东乐安[chunk_id=370,371]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 11,
+    "sub_type": "timeline",
+    "question": "高邮之战与龙湾之战相比，谁先发生？",
+    "keypoints": [
+      {
+        "answer": "高邮之战（1353年）早于龙湾之战（1360年）",
+        "score": 1
+      }
+    ],
+    "llm_results": "高邮之战先发生[chunk_id=18,33]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 12,
+    "sub_type": "timeline",
+    "question": "明朝建立和明朝开科举的先后顺序如何？",
+    "keypoints": [
+      {
+        "answer": "明朝建立（1368年）早于明朝开科举（1370年）",
+        "score": 1
+      }
+    ],
+    "llm_results": "明朝建立于1368年正月初四[chunk_id=74]，开科举于洪武三年（1370年）[chunk_id=94]，故明朝建立在先，开科举在后。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 13,
+    "sub_type": "timeline",
+    "question": "建文帝削藩、金川门之变这两件事哪一个在前？",
+    "keypoints": [
+      {
+        "answer": "建文帝削藩（1399年）早于金川门之变（1402年）",
+        "score": 1
+      }
+    ],
+    "llm_results": "建文帝削藩在前[chunk_id=194,268]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 14,
+    "sub_type": "timeline",
+    "question": "《永乐大典》先开馆还是先编成？",
+    "keypoints": [
+      {
+        "answer": "《永乐大典》开馆编修（1403年）早于《永乐大典》编成（1407年）",
+        "score": 1
+      }
+    ],
+    "llm_results": "《永乐大典》先开馆编撰，后编成[chunk_id=281,283]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 15,
+    "sub_type": "timeline",
+    "question": "设立东厂和明朝迁都北京，哪项更早落定？",
+    "keypoints": [
+      {
+        "answer": "设立东厂（1420年）早于明朝迁都北京（1421年）",
+        "score": 1
+      }
+    ],
+    "llm_results": "设立东厂更早落定[chunk_id=334,291]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 16,
+    "sub_type": "timeline",
+    "question": "朱元璋从投奔郭子兴到攻克应天，中间相隔多少年？",
+    "keypoints": [
+      {
+        "answer": "从1352年朱元璋投奔郭子兴到1356年朱元璋攻克应天，相隔4年",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 17,
+    "sub_type": "timeline",
+    "question": "龙湾之战后到武昌受降，朱陈战争线索延续了多久？",
+    "keypoints": [
+      {
+        "answer": "从1360年龙湾之战到1364年武昌受降，相隔4年",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 18,
+    "sub_type": "timeline",
+    "question": "从建文帝削藩推到朱棣即位，按年份差计算是几年？",
+    "keypoints": [
+      {
+        "answer": "从1399年建文帝削藩到1402年朱棣即位，相隔3年",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 19,
+    "sub_type": "timeline",
+    "question": "《永乐大典》由开馆编修到正式编成，耗时多长？",
+    "keypoints": [
+      {
+        "answer": "从1403年《永乐大典》开馆编修到1407年《永乐大典》编成，相隔4年",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 20,
+    "sub_type": "timeline",
+    "question": "设立东厂至朱棣榆木川病逝，永乐后期这段隔了几年？",
+    "keypoints": [
+      {
+        "answer": "从1420年设立东厂到1424年朱棣北征病逝榆木川，相隔4年",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 21,
+    "sub_type": "timeline",
+    "question": "1360年朱陈局势骤变时，三件核心大事各叫什么、发生在何处？",
+    "keypoints": [
+      {
+        "answer": "陈友谅弑徐寿辉建汉",
+        "score": 0
+      },
+      {
+        "answer": "采石五通庙",
+        "score": 0
+      },
+      {
+        "answer": "刘基归附朱元璋",
+        "score": 0
+      },
+      {
+        "answer": "处州",
+        "score": 0
+      },
+      {
+        "answer": "龙湾之战",
+        "score": 0
+      },
+      {
+        "answer": "龙湾",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 6,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 22,
+    "sub_type": "timeline",
+    "question": "洪武十三年前后，政治清洗、官制变化和连坐惩戒相关四项记录各是什么、造成了什么结果？",
+    "keypoints": [
+      {
+        "answer": "胡惟庸案",
+        "score": 0
+      },
+      {
+        "answer": "朱元璋借涂节告发与既有案由处死胡惟庸并深挖所谓同党，案件连年扩大，被杀者逾万，洪武朝由此进入大规模政治恐怖阶段。",
+        "score": 0
+      },
+      {
+        "answer": "废除丞相制度",
+        "score": 0
+      },
+      {
+        "answer": "中书省与丞相职位被彻底撤销，六部分流原有政务，最高决策权集中于皇帝本人，明代中央官制由此发生根本转向。",
+        "score": 0
+      },
+      {
+        "answer": "宋濂险遭连坐",
+        "score": 0
+      },
+      {
+        "answer": "宋濂因孙子牵连被押回京师，本已在连坐处死边缘，最终因马皇后苦求而保住性命，显示胡惟庸案株连范围之广。",
+        "score": 0
+      },
+      {
+        "answer": "朱亮祖父子鞭死案",
+        "score": 0
+      },
+      {
+        "answer": "朱元璋在查明朱亮祖包庇豪强、逼死道同后，将其与子朱暹押至京师活活鞭死，并继续诛杀相关恶霸，以示严惩骄横贪暴。",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 8,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 23,
+    "sub_type": "timeline",
+    "question": "靖难起兵开局，怀来、雄县、真定和大宁相关行动分别叫什么、落在何处？",
+    "keypoints": [
+      {
+        "answer": "怀来之战",
+        "score": 0
+      },
+      {
+        "answer": "怀来",
+        "score": 0
+      },
+      {
+        "answer": "雄县之战",
+        "score": 0
+      },
+      {
+        "answer": "雄县、月漾桥",
+        "score": 0
+      },
+      {
+        "answer": "真定之战",
+        "score": 0
+      },
+      {
+        "answer": "真定",
+        "score": 0
+      },
+      {
+        "answer": "朱棣挟持宁王朱权",
+        "score": 0
+      },
+      {
+        "answer": "大宁、宁王属地",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 8,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 24,
+    "sub_type": "timeline",
+    "question": "永乐八年至十二年的北征和军政随行线索，可怎样一一对应到名称和地点？",
+    "keypoints": [
+      {
+        "answer": "斡难河击溃本雅失里",
+        "score": 0
+      },
+      {
+        "answer": "斡难河",
+        "score": 0
+      },
+      {
+        "answer": "朱棣回曲津击溃阿鲁台",
+        "score": 0
+      },
+      {
+        "answer": "阔滦海子、回曲津",
+        "score": 0
+      },
+      {
+        "answer": "忽兰忽失温之战",
+        "score": 0
+      },
+      {
+        "answer": "忽兰忽失温、图拉河一带",
+        "score": 0
+      },
+      {
+        "answer": "杨荣随征掌印信",
+        "score": 0
+      },
+      {
+        "answer": "北征军中",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 8,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 25,
+    "sub_type": "timeline",
+    "question": "宣德元年处理朱高煦叛乱的三步，分别是什么、在哪里发生、结果怎样？",
+    "keypoints": [
+      {
+        "answer": "朱高煦乐安起兵",
+        "score": 0
+      },
+      {
+        "answer": "乐安",
+        "score": 0
+      },
+      {
+        "answer": "朱高煦拉拢张辅失败，又拒绝侯泰劝谕并公开炫示兵甲，长期阴谋至此演成公开叛乱。",
+        "score": 0
+      },
+      {
+        "answer": "乐安之役",
+        "score": 0
+      },
+      {
+        "answer": "乐安",
+        "score": 0
+      },
+      {
+        "answer": "宣宗亲征十日抵达乐安，守军迅速崩溃，朱高煦出降，叛乱短时间内即被彻底平定。",
+        "score": 0
+      },
+      {
+        "answer": "朱高煦被焚死",
+        "score": 0
+      },
+      {
+        "answer": "西安门牢狱",
+        "score": 0
+      },
+      {
+        "answer": "朱高煦因狱中再次挑衅宣宗而被铜缸炭火焚死，永乐以来最危险的宗室夺位隐患至此终结。",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 9,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 26,
+    "sub_type": "timeline",
+    "question": "宣德元年至宣德十年，宫廷制度、远航收束和皇位交接构成怎样的关键大事组合？",
+    "keypoints": [
+      {
+        "answer": "内书堂设立",
+        "score": 0
+      },
+      {
+        "answer": "郑和第七次下西洋",
+        "score": 0
+      },
+      {
+        "answer": "郑和卒于古里",
+        "score": 0
+      },
+      {
+        "answer": "朱瞻基去世",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 4,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 27,
+    "sub_type": "timeline",
+    "question": "正统十四年的瓦剌危机从贸易决裂推进到北京转危为安，应纳入哪些主要节点？",
+    "keypoints": [
+      {
+        "answer": "瓦剌与明朝朝贡贸易决裂",
+        "score": 1
+      },
+      {
+        "answer": "明英宗亲征瓦剌",
+        "score": 0
+      },
+      {
+        "answer": "阳和之战",
+        "score": 0
+      },
+      {
+        "answer": "土木堡之变",
+        "score": 1
+      },
+      {
+        "answer": "朱祁镇陷瓦剌为人质",
+        "score": 1
+      },
+      {
+        "answer": "喜宁叛降瓦剌",
+        "score": 0
+      },
+      {
+        "answer": "于谦廷斥南迁议",
+        "score": 0
+      },
+      {
+        "answer": "京师总动员备战",
+        "score": 1
+      },
+      {
+        "answer": "午门廷争诛马顺",
+        "score": 0
+      },
+      {
+        "answer": "朱祁钰即位景泰",
+        "score": 0
+      },
+      {
+        "answer": "也先挟太上皇叩关宣府大同",
+        "score": 0
+      },
+      {
+        "answer": "紫荆关失守",
+        "score": 0
+      },
+      {
+        "answer": "北京保卫战",
+        "score": 1
+      },
+      {
+        "answer": "也先攻居庸关失败",
+        "score": 0
+      },
+      {
+        "answer": "脱脱不花与明议和迫使也先罢兵",
+        "score": 0
+      },
+      {
+        "answer": "黑松林谋杀朱祁镇未遂",
+        "score": 0
+      }
+    ],
+    "llm_results": "正统十四年瓦剌危机从贸易决裂到北京转危为安的主要节点包括：贸易纠纷引发冲突[chunk_id=413]；也先在土木堡击溃明军二十万精锐并活捉明朝皇帝[chunk_id=432]；也先率军十一天攻至北京城下[chunk_id=432]；于谦下达总动员令使京城兵多粮足、人心恢复信念[chunk_id=432]；于谦否决坚壁清野提议，命令大军开出九门列阵迎敌并严明军纪[chunk_id=434]；神机营在德胜门利用民房据点以火枪全歼瓦剌骑兵并击毙其高级将领博罗茂洛海[chunk_id=440]。",
+    "score": {
+      "0": 11,
+      "1": 5
+    }
+  },
+  {
+    "qna_id": 28,
+    "sub_type": "timeline",
+    "question": "景泰元年到天顺元年前后，太上皇归还、储位反复和复辟清洗可整理成怎样的大事链条？",
+    "keypoints": [
+      {
+        "answer": "宣府擒杀喜宁",
+        "score": 0
+      },
+      {
+        "answer": "朝廷议迎太上皇",
+        "score": 0
+      },
+      {
+        "answer": "李实出使瓦剌",
+        "score": 0
+      },
+      {
+        "answer": "杨善说服也先送还朱祁镇",
+        "score": 0
+      },
+      {
+        "answer": "朱祁镇还京幽居南宫",
+        "score": 1
+      },
+      {
+        "answer": "南宫金刀案",
+        "score": 0
+      },
+      {
+        "answer": "废朱见深立朱见济",
+        "score": 1
+      },
+      {
+        "answer": "复储之议",
+        "score": 1
+      },
+      {
+        "answer": "夺门之变",
+        "score": 1
+      },
+      {
+        "answer": "朱见深被废为沂王",
+        "score": 0
+      },
+      {
+        "answer": "朱见深复立太子",
+        "score": 0
+      },
+      {
+        "answer": "天顺复辟封赏与清洗",
+        "score": 1
+      },
+      {
+        "answer": "于谦冤案",
+        "score": 1
+      },
+      {
+        "answer": "朱祁钰被废与天顺二帝并存",
+        "score": 0
+      },
+      {
+        "answer": "还乡团第一次内斗",
+        "score": 0
+      },
+      {
+        "answer": "徐有贞失势流放",
+        "score": 0
+      }
+    ],
+    "llm_results": "景泰元年朱祁镇归国后被囚禁于南宫[chunk_id=470]。景泰三年皇太子朱见深被废，朱见济继任太子[chunk_id=474]。景泰五年要求复储的大臣遭廷杖打压[chunk_id=478]。景泰八年正月朱祁镇夺门成功登基改元天顺[chunk_id=490]。复辟后朱祁镇冤杀于谦并清洗夺门功臣[chunk_id=490,501]。",
+    "score": {
+      "0": 10,
+      "1": 6
+    }
+  },
+  {
+    "qna_id": 29,
+    "sub_type": "timeline",
+    "question": "张敏揭示皇子身份与西厂设立相比，哪一件更早发生？",
+    "keypoints": [
+      {
+        "answer": "张敏揭示皇子身份（1475年）早于西厂设立（1477年）",
+        "score": 1
+      }
+    ],
+    "llm_results": "张敏揭示皇子身份更早发生[chunk_id=520,530]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 30,
+    "sub_type": "timeline",
+    "question": "宁王之乱的开端、南昌易手和最终收束，三处关键落点各对应什么记录？",
+    "keypoints": [
+      {
+        "answer": "宁王起兵杀孙燧许逵",
+        "score": 0
+      },
+      {
+        "answer": "南昌惠民门",
+        "score": 0
+      },
+      {
+        "answer": "王守仁攻取南昌",
+        "score": 1
+      },
+      {
+        "answer": "南昌",
+        "score": 1
+      },
+      {
+        "answer": "宁王之乱平定",
+        "score": 1
+      },
+      {
+        "answer": "鄱阳湖",
+        "score": 0
+      }
+    ],
+    "llm_results": "宁王之乱的开端是朱宸濠在南昌起兵叛乱[chunk_id=632]。南昌易手对应王守仁占领南昌，导致宁王得知消息后急火攻心并下令全军撤退[chunk_id=624]。最终收束是正德十四年七月二十七日宁王之乱正式平定，朱宸濠被王守仁一举剿灭[chunk_id=632]。",
+    "score": {
+      "0": 3,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 31,
+    "sub_type": "timeline",
+    "question": "郑和最后一次远航重新启程，对应的大事名称是什么？",
+    "keypoints": [
+      {
+        "answer": "郑和第七次下西洋",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 32,
+    "sub_type": "timeline",
+    "question": "朱祁镇被瓦剌扣作筹码后，停留在何处？",
+    "keypoints": [
+      {
+        "answer": "瓦剌军营",
+        "score": 0
+      }
+    ],
+    "llm_results": "朱祁镇被瓦剌扣作筹码后，每日随军四处漂泊[chunk_id=451]。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 33,
+    "sub_type": "timeline",
+    "question": "朱祁钰登基并把朱祁镇改称太上皇，这一变局叫什么？",
+    "keypoints": [
+      {
+        "answer": "朱祁钰即位景泰",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 34,
+    "sub_type": "timeline",
+    "question": "王守仁心学突破发生在什么地方？",
+    "keypoints": [
+      {
+        "answer": "贵州龙场（今贵州修文）",
+        "score": 1
+      }
+    ],
+    "llm_results": "王守仁心学突破发生在贵州龙场[chunk_id=568]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 35,
+    "sub_type": "timeline",
+    "question": "朱厚照在南巡途中落水，落水地点写作何处？",
+    "keypoints": [
+      {
+        "answer": "清江浦积水池",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱厚照落水地点写作清江浦的积水池[chunk_id=653]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 36,
+    "sub_type": "timeline",
+    "question": "内书堂设立与郑和第七次下西洋相比，谁更早发生？",
+    "keypoints": [
+      {
+        "answer": "内书堂设立（1426年）早于郑和第七次下西洋（1431年）",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 37,
+    "sub_type": "timeline",
+    "question": "土木堡之变、宣府擒杀喜宁排先后，排在前面的事件是什么？",
+    "keypoints": [
+      {
+        "answer": "土木堡之变（1449年）早于宣府擒杀喜宁（1450年）",
+        "score": 1
+      }
+    ],
+    "llm_results": "土木堡之变排在前面[chunk_id=401,456]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 38,
+    "sub_type": "timeline",
+    "question": "夺门之变在曹钦之变之前还是之后？",
+    "keypoints": [
+      {
+        "answer": "夺门之变（1457年）早于曹钦之变（1461年）",
+        "score": 1
+      }
+    ],
+    "llm_results": "夺门之变在曹钦之变之前[chunk_id=492,506]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 39,
+    "sub_type": "timeline",
+    "question": "西厂设立和汪直边衅失宠，先发生的是前者还是后者？",
+    "keypoints": [
+      {
+        "answer": "西厂设立（1477年）早于汪直边衅失宠（1481年）",
+        "score": 1
+      }
+    ],
+    "llm_results": "先发生的是西厂设立[chunk_id=530]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 40,
+    "sub_type": "timeline",
+    "question": "龙场悟道同刘瑾伏诛与刘党清算相比，先出现的是前者还是后者？",
+    "keypoints": [
+      {
+        "answer": "龙场悟道（1508年）早于刘瑾伏诛与刘党清算（1510年）",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 41,
+    "sub_type": "timeline",
+    "question": "郑和第七次下西洋到郑和卒于古里，首尾相差多少年？",
+    "keypoints": [
+      {
+        "answer": "从1431年郑和第七次下西洋到1433年郑和卒于古里，相差2年",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 42,
+    "sub_type": "timeline",
+    "question": "王振专权乱政发展到土木堡之变，中间隔了几年？",
+    "keypoints": [
+      {
+        "answer": "从1442年王振专权乱政到1449年土木堡之变，中间隔了7年",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 43,
+    "sub_type": "timeline",
+    "question": "朱祁镇还京幽居南宫至夺门之变，这段南宫岁月按年份差算多久？",
+    "keypoints": [
+      {
+        "answer": "从1450年朱祁镇还京幽居南宫到1457年夺门之变，按年份差算为7年",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 44,
+    "sub_type": "timeline",
+    "question": "纪妃怀孕保胎之后到张敏揭示皇子身份，秘密抚养线索延续了几个年头？",
+    "keypoints": [
+      {
+        "answer": "从1469年纪妃怀孕保胎到1475年张敏揭示皇子身份，延续6年",
+        "score": 0
+      }
+    ],
+    "llm_results": "秘密抚养线索延续了五年[chunk_id=519,520]。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 45,
+    "sub_type": "timeline",
+    "question": "刘瑾逆转夺权到刘瑾伏诛与刘党清算，权势起落跨过多少年？",
+    "keypoints": [
+      {
+        "answer": "从1506年刘瑾逆转夺权到1510年刘瑾伏诛与刘党清算，跨过4年",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 46,
+    "sub_type": "timeline",
+    "question": "土木堡危机后，喜宁被擒杀发生在何处？",
+    "keypoints": [
+      {
+        "answer": "宣府城外",
+        "score": 0
+      }
+    ],
+    "llm_results": "喜宁在宣府被擒杀[chunk_id=456]。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 47,
+    "sub_type": "timeline",
+    "question": "从西厂设立到汪直边衅失宠，汪直权势起落前后隔了多久？",
+    "keypoints": [
+      {
+        "answer": "从1477年西厂设立到1481年汪直边衅失宠，按年份差跨了4年",
+        "score": 0
+      }
+    ],
+    "llm_results": "汪直权势起落前后隔了十余年[chunk_id=533]。",
+    "score": {
+      "0": 1,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 48,
+    "sub_type": "timeline",
+    "question": "正德元年王守仁遭贬前后，连续几件事的名称与发生地如何对应？",
+    "keypoints": [
+      {
+        "answer": "刘瑾廷杖言官与贬谪王守仁",
+        "score": 0
+      },
+      {
+        "answer": "北京",
+        "score": 0
+      },
+      {
+        "answer": "王守仁诈死避杀手",
+        "score": 0
+      },
+      {
+        "answer": "杭州钱塘江",
+        "score": 0
+      },
+      {
+        "answer": "王守仁赴任龙场",
+        "score": 0
+      },
+      {
+        "answer": "贵州龙场（今贵州修文）",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 6,
+      "1": 0
+    }
+  },
+  {
+    "qna_id": 49,
+    "sub_type": "timeline",
+    "question": "正德五年除刘瑾链条里，军屯、叛乱、密谋、夜奏、伏诛各自是什么结果？",
+    "keypoints": [
+      {
+        "answer": "刘瑾整顿军屯",
+        "score": 1
+      },
+      {
+        "answer": "刘瑾试图整顿军屯制造政绩，却把新增粮额转嫁给宁夏士兵，引发安化王之乱",
+        "score": 1
+      },
+      {
+        "answer": "安化王之乱",
+        "score": 1
+      },
+      {
+        "answer": "朱寘鐇叛乱很快被平定，但叛乱文书把刘瑾罪状公开化，成为除刘瑾的重要契机",
+        "score": 0
+      },
+      {
+        "answer": "杨一清张永宁夏密谋除刘瑾",
+        "score": 1
+      },
+      {
+        "answer": "杨一清说动张永携带十七条罪状回京告发刘瑾，并要求张永以死相争、立即行动",
+        "score": 1
+      },
+      {
+        "answer": "张永夜奏刘瑾",
+        "score": 1
+      },
+      {
+        "answer": "张永夜宴中说动朱厚照下令抓捕刘瑾，刘瑾在内值房被张永拿下",
+        "score": 0
+      },
+      {
+        "answer": "刘瑾伏诛与刘党清算",
+        "score": 0
+      },
+      {
+        "answer": "刘瑾以谋反罪被凌迟，张彩等刘党遭清算，杨一清入中央任要职，朝局重新回到文臣主导",
+        "score": 0
+      }
+    ],
+    "llm_results": "- 军屯：刘瑾整理军屯实际上根本实行不了，多出的公粮压在了士兵身上[chunk_id=577]。\n- 叛乱：安化王朱寘鐇发动的宁夏叛乱被杨一清平定[chunk_id=580]。\n- 密谋：杨一清在饯行宴上向张永摊牌并说服其除掉刘瑾[chunk_id=580]。\n- 夜奏：张永抵京后利用杨一清提供的列有十七条罪状的文书向皇帝告状[chunk_id=581]。\n- 伏诛：杨一清预言张永行动后十日内必杀刘瑾[chunk_id=581]。",
+    "score": {
+      "0": 4,
+      "1": 6
+    }
+  },
+  {
+    "qna_id": 50,
+    "sub_type": "timeline",
+    "question": "鄱阳湖决战到宁王之乱平定，相关战事逐项是什么、发生在何处？",
+    "keypoints": [
+      {
+        "answer": "黄家渡对峙",
+        "score": 0
+      },
+      {
+        "answer": "鄱阳湖黄家渡",
+        "score": 0
+      },
+      {
+        "answer": "鄱阳湖夜袭初战",
+        "score": 0
+      },
+      {
+        "answer": "鄱阳湖黄家渡",
+        "score": 0
+      },
+      {
+        "answer": "鄱阳湖二十四日恶战",
+        "score": 0
+      },
+      {
+        "answer": "鄱阳湖八字脑",
+        "score": 0
+      },
+      {
+        "answer": "鄱阳湖火攻擒宁王",
+        "score": 0
+      },
+      {
+        "answer": "鄱阳湖樵舍",
+        "score": 0
+      },
+      {
+        "answer": "宁王之乱平定",
+        "score": 0
+      },
+      {
+        "answer": "鄱阳湖",
+        "score": 0
+      }
+    ],
+    "llm_results": "根据现有资料，无法回答此问题。",
+    "score": {
+      "0": 10,
+      "1": 0
+    }
+  }
+]

@@ -1,0 +1,33 @@
+# Local model files
+model/*
+!model/README.md
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python build/test cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+/build/
+/dist/
+*.egg-info/
+.gitnexus
+
+# Milvus Lite 本地库：首次启动用 data/raw 的 JSON 自动重建，不入仓库
+data/milvus_lite.db/
+data/*.lock
+data/.*.lock
+
+# 大语料：仅保留实际启动用到的 _1_661.json，其余构建中间产物不入仓库
+data/raw/mingchao_vectorized.json
+data/raw/mingchao_chunks.json
+
+# 开发产物，不随开源包分发
+eval/
+Agentic_RAG_Test.ipynb
+flowchart.html

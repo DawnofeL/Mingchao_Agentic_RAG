@@ -1,0 +1,1192 @@
+[
+    {
+        "qna_id": "1",
+        "sub_type": "description",
+        "question": "谁确认朱重八不是奸细，并把他留在自己身边？",
+        "gt_chunk_ids": [
+            9
+        ]
+    },
+    {
+        "qna_id": "2",
+        "sub_type": "description",
+        "question": "常遇春拿什么行动让朱元璋承认他有先锋之才？",
+        "gt_chunk_ids": [
+            24
+        ]
+    },
+    {
+        "qna_id": "4",
+        "sub_type": "description",
+        "question": "被俘后的张士诚怎样表现自己的不屈服？",
+        "gt_chunk_ids": [
+            65
+        ]
+    },
+    {
+        "qna_id": "5",
+        "sub_type": "description",
+        "question": "傅友德这一路北征最后打到什么程度？",
+        "gt_chunk_ids": [
+            91
+        ]
+    },
+    {
+        "qna_id": "3",
+        "sub_type": "description",
+        "question": "张子明被迫劝降洪都时，真正传给守军的消息是哪一种？",
+        "gt_chunk_ids": [
+            47
+        ]
+    },
+    {
+        "qna_id": "7",
+        "sub_type": "description",
+        "question": "朱元璋为陈友谅准备的龙湾圈套，最后落成了怎样的场面？",
+        "gt_chunk_ids": [
+            31,
+            33
+        ]
+    },
+    {
+        "qna_id": "6",
+        "sub_type": "description",
+        "question": "郭子兴集团内部的压制给朱元璋带来了哪条新路？",
+        "gt_chunk_ids": [
+            10,
+            11
+        ]
+    },
+    {
+        "qna_id": "8",
+        "sub_type": "description",
+        "question": "抚州门一线从危急到守住，经历了哪些关键变化？",
+        "gt_chunk_ids": [
+            43,
+            44
+        ]
+    },
+    {
+        "qna_id": "9",
+        "sub_type": "description",
+        "question": "张定边直冲朱元璋这场险情，从逼近到化解经历了哪些关键节点？",
+        "gt_chunk_ids": [
+            52,
+            53
+        ]
+    },
+    {
+        "qna_id": "10",
+        "sub_type": "description",
+        "question": "徐达北征一度占优，后来遭遇了哪场转折？",
+        "gt_chunk_ids": [
+            88,
+            89
+        ]
+    },
+    {
+        "qna_id": "11",
+        "sub_type": "causation",
+        "question": "修河这件事为何会成为元朝末年的引爆点？",
+        "gt_chunk_ids": [
+            7
+        ]
+    },
+    {
+        "qna_id": "12",
+        "sub_type": "causation",
+        "question": "作者为什么不把朱重八投军写成毫无顾虑的英雄冲动？",
+        "gt_chunk_ids": [
+            8
+        ]
+    },
+    {
+        "qna_id": "13",
+        "sub_type": "causation",
+        "question": "朱元璋先打陈友谅的判断，核心依据是什么？",
+        "gt_chunk_ids": [
+            25
+        ]
+    },
+    {
+        "qna_id": "14",
+        "sub_type": "causation",
+        "question": "赵普胜之死何以削弱陈友谅的队伍？",
+        "gt_chunk_ids": [
+            37
+        ]
+    },
+    {
+        "qna_id": "15",
+        "sub_type": "causation",
+        "question": "作者把农民领袖变成地主的根源归到哪里？",
+        "gt_chunk_ids": [
+            60
+        ]
+    },
+    {
+        "qna_id": "16",
+        "sub_type": "causation",
+        "question": "朱重八早年的灾难为什么会让他的心态发生转变？",
+        "gt_chunk_ids": [
+            3,
+            4
+        ]
+    },
+    {
+        "qna_id": "17",
+        "sub_type": "causation",
+        "question": "陈友谅后来的行事方式和早年处境之间有什么因果关系？",
+        "gt_chunk_ids": [
+            20,
+            21
+        ]
+    },
+    {
+        "qna_id": "18",
+        "sub_type": "causation",
+        "question": "刘基反对救安丰的担心，后来如何应验？",
+        "gt_chunk_ids": [
+            38,
+            39
+        ]
+    },
+    {
+        "qna_id": "19",
+        "sub_type": "causation",
+        "question": "作者怎样解释陈友谅最后败局的深层原因？",
+        "gt_chunk_ids": [
+            57,
+            58
+        ]
+    },
+    {
+        "qna_id": "22",
+        "sub_type": "description",
+        "question": "周观政阻止女乐入宫这件事如何收场？",
+        "gt_chunk_ids": [
+            102
+        ]
+    },
+    {
+        "qna_id": "21",
+        "sub_type": "description",
+        "question": "普通考生在明朝科举中取得做官资格要依次经历哪几级考试？",
+        "gt_chunk_ids": [
+            94,
+            95
+        ]
+    },
+    {
+        "qna_id": "20",
+        "sub_type": "causation",
+        "question": "王保保围兰州的计划为什么没能让徐达掉进坑里？",
+        "gt_chunk_ids": [
+            80,
+            81
+        ]
+    },
+    {
+        "qna_id": "23",
+        "sub_type": "description",
+        "question": "朱元璋询问丞相人选时刘基怎样逐一应答？",
+        "gt_chunk_ids": [
+            105
+        ]
+    },
+    {
+        "qna_id": "24",
+        "sub_type": "description",
+        "question": "朱元璋探访罗复仁家时看到的清贫景象是什么样的？",
+        "gt_chunk_ids": [
+            123
+        ]
+    },
+    {
+        "qna_id": "25",
+        "sub_type": "description",
+        "question": "蓝玉的骑兵先锋在庆州一战中打出了哪些战果？",
+        "gt_chunk_ids": [
+            141
+        ]
+    },
+    {
+        "qna_id": "26",
+        "sub_type": "description",
+        "question": "李成桂带兵出征辽东最终改写了高丽政局的哪一段走向？",
+        "gt_chunk_ids": [
+            168
+        ]
+    },
+    {
+        "qna_id": "27",
+        "sub_type": "description",
+        "question": "李善长是怎样被胡惟庸一步步拖进同一阵营的？",
+        "gt_chunk_ids": [
+            108,
+            109
+        ]
+    },
+    {
+        "qna_id": "28",
+        "sub_type": "description",
+        "question": "朱元璋对胡惟庸的清算在正式动手前经历了哪些铺垫？",
+        "gt_chunk_ids": [
+            110,
+            111
+        ]
+    },
+    {
+        "qna_id": "29",
+        "sub_type": "description",
+        "question": "捕鱼儿海战役寻找敌军的关键时刻蓝玉作出了哪一个决定？",
+        "gt_chunk_ids": [
+            147,
+            148
+        ]
+    },
+    {
+        "qna_id": "30",
+        "sub_type": "description",
+        "question": "哪些骄纵不法的举动把蓝玉推向了蓝玉案？",
+        "gt_chunk_ids": [
+            153,
+            154
+        ]
+    },
+    {
+        "qna_id": "32",
+        "sub_type": "causation",
+        "question": "历史规则在朱元璋废相后给他安排了怎样的新对手？",
+        "gt_chunk_ids": [
+            116
+        ]
+    },
+    {
+        "qna_id": "31",
+        "sub_type": "causation",
+        "question": "作者怎样解释刘基的待遇远逊李善长？",
+        "gt_chunk_ids": [
+            103
+        ]
+    },
+    {
+        "qna_id": "35",
+        "sub_type": "causation",
+        "question": "作者怎样解释朱元璋严密制度后来的反向失灵？",
+        "gt_chunk_ids": [
+            163
+        ]
+    },
+    {
+        "qna_id": "33",
+        "sub_type": "causation",
+        "question": "郑士利说明空印案真相后仍被处罚的深层原因是什么？",
+        "gt_chunk_ids": [
+            130
+        ]
+    },
+    {
+        "qna_id": "34",
+        "sub_type": "causation",
+        "question": "洪武肃贪成效有限的几层原因分别是什么？",
+        "gt_chunk_ids": [
+            136
+        ]
+    },
+    {
+        "qna_id": "36",
+        "sub_type": "causation",
+        "question": "李善长和刘基为何会成为朝廷两大地域集团冲突的核心人物？",
+        "gt_chunk_ids": [
+            100,
+            103
+        ]
+    },
+    {
+        "qna_id": "37",
+        "sub_type": "causation",
+        "question": "朱元璋本人在取消丞相职位后先承担了怎样的制度代价？",
+        "gt_chunk_ids": [
+            115,
+            116
+        ]
+    },
+    {
+        "qna_id": "38",
+        "sub_type": "causation",
+        "question": "制度和经济层面怎样诱发明初官吏依靠额外名目敛取收入？",
+        "gt_chunk_ids": [
+            121,
+            122
+        ]
+    },
+    {
+        "qna_id": "39",
+        "sub_type": "causation",
+        "question": "哪些经历让蓝玉形成了执着于北征立功的心结？",
+        "gt_chunk_ids": [
+            139,
+            140
+        ]
+    },
+    {
+        "qna_id": "40",
+        "sub_type": "causation",
+        "question": "朱标之死怎样改变了朱元璋对功臣和继承安排的判断？",
+        "gt_chunk_ids": [
+            155,
+            156
+        ]
+    },
+    {
+        "qna_id": "41",
+        "sub_type": "description",
+        "question": "朱元璋怎样看待刚出生的朱棣？",
+        "gt_chunk_ids": [
+            171
+        ]
+    },
+    {
+        "qna_id": "42",
+        "sub_type": "description",
+        "question": "朱棣第一次独立领兵面对乃儿不花时从定位对手到完成目标经历了怎样的过程？",
+        "gt_chunk_ids": [
+            174,
+            175
+        ]
+    },
+    {
+        "qna_id": "43",
+        "sub_type": "description",
+        "question": "朱允炆提出藩王隐患后给朱元璋列出了哪些处理办法？",
+        "gt_chunk_ids": [
+            183
+        ]
+    },
+    {
+        "qna_id": "44",
+        "sub_type": "description",
+        "question": "道衍初见燕王朱棣时用什么说法打动了他？",
+        "gt_chunk_ids": [
+            188
+        ]
+    },
+    {
+        "qna_id": "45",
+        "sub_type": "description",
+        "question": "朱允炆削藩开局的目标选择和实际行动是怎样展开的？",
+        "gt_chunk_ids": [
+            193,
+            194
+        ]
+    },
+    {
+        "qna_id": "46",
+        "sub_type": "description",
+        "question": "建文帝最后如何处理入京祭拜的朱高炽三兄弟？",
+        "gt_chunk_ids": [
+            199
+        ]
+    },
+    {
+        "qna_id": "47",
+        "sub_type": "description",
+        "question": "张信这条线怎样让朱棣从伪装状态转入商议对策？",
+        "gt_chunk_ids": [
+            200,
+            201
+        ]
+    },
+    {
+        "qna_id": "48",
+        "sub_type": "description",
+        "question": "东昌一战中北军主帅从猛攻到脱身的过程是什么？",
+        "gt_chunk_ids": [
+            238,
+            239
+        ]
+    },
+    {
+        "qna_id": "49",
+        "sub_type": "description",
+        "question": "北军到达京城前后如何从江边受阻走到入城？",
+        "gt_chunk_ids": [
+            257,
+            258
+        ]
+    },
+    {
+        "qna_id": "50",
+        "sub_type": "description",
+        "question": "朱允炆失踪前北军对皇城采取了怎样的安排？",
+        "gt_chunk_ids": [
+            261
+        ]
+    },
+    {
+        "qna_id": "51",
+        "sub_type": "causation",
+        "question": "作者称朱棣可怕的根本依据是什么？",
+        "gt_chunk_ids": [
+            176
+        ]
+    },
+    {
+        "qna_id": "52",
+        "sub_type": "causation",
+        "question": "朱允炆接班前后为什么会把藩王叔叔们视作隐患？",
+        "gt_chunk_ids": [
+            181,
+            182
+        ]
+    },
+    {
+        "qna_id": "53",
+        "sub_type": "causation",
+        "question": "黄子澄让朱允炆放心动手的理由是什么？",
+        "gt_chunk_ids": [
+            186
+        ]
+    },
+    {
+        "qna_id": "54",
+        "sub_type": "causation",
+        "question": "道衍推动朱棣起事的内在驱动力来自哪里？",
+        "gt_chunk_ids": [
+            192
+        ]
+    },
+    {
+        "qna_id": "55",
+        "sub_type": "causation",
+        "question": "建文帝连续处置藩王为什么让朱棣认为自己已无退路？",
+        "gt_chunk_ids": [
+            194,
+            195
+        ]
+    },
+    {
+        "qna_id": "56",
+        "sub_type": "causation",
+        "question": "朱棣从称病派子入京到装疯的背后压力是怎样变化的？",
+        "gt_chunk_ids": [
+            199,
+            200
+        ]
+    },
+    {
+        "qna_id": "57",
+        "sub_type": "causation",
+        "question": "道衍点醒朱棣的关键思路是什么？",
+        "gt_chunk_ids": [
+            249
+        ]
+    },
+    {
+        "qna_id": "58",
+        "sub_type": "causation",
+        "question": "朱棣末段进军为何绕开原先难点而转向徐州一路？",
+        "gt_chunk_ids": [
+            249,
+            250
+        ]
+    },
+    {
+        "qna_id": "59",
+        "sub_type": "causation",
+        "question": "作者认为朱棣清算反对者暴露出的真正心理是什么？",
+        "gt_chunk_ids": [
+            263
+        ]
+    },
+    {
+        "qna_id": "60",
+        "sub_type": "causation",
+        "question": "先前关于藩王的讨论给朱允炆正式削藩提供了什么支撑？",
+        "gt_chunk_ids": [
+            183,
+            186
+        ]
+    },
+    {
+        "qna_id": "61",
+        "sub_type": "description",
+        "question": "姚广孝受封后过的是什么样的生活？",
+        "gt_chunk_ids": [
+            267
+        ]
+    },
+    {
+        "qna_id": "62",
+        "sub_type": "description",
+        "question": "爪哇风波里，郑和最终怎样处理船员遇害一事？",
+        "gt_chunk_ids": [
+            299
+        ]
+    },
+    {
+        "qna_id": "64",
+        "sub_type": "description",
+        "question": "杨荣处理宁夏急报时给出了什么判断？",
+        "gt_chunk_ids": [
+            341
+        ]
+    },
+    {
+        "qna_id": "65",
+        "sub_type": "description",
+        "question": "朱棣暮年北征阿鲁台，最终结局是什么？",
+        "gt_chunk_ids": [
+            362
+        ]
+    },
+    {
+        "qna_id": "63",
+        "sub_type": "description",
+        "question": "忽兰忽失温交战时，明军阵型发生了哪些变化？",
+        "gt_chunk_ids": [
+            326
+        ]
+    },
+    {
+        "qna_id": "67",
+        "sub_type": "description",
+        "question": "陈祖义遇到郑和舰队后，这场海上冲突怎样变成了明军的伏击？",
+        "gt_chunk_ids": [
+            300,
+            301
+        ]
+    },
+    {
+        "qna_id": "66",
+        "sub_type": "description",
+        "question": "《永乐大典》的编修从解缙初稿到大规模重修，大致经历了怎样的推进过程？",
+        "gt_chunk_ids": [
+            281,
+            282
+        ]
+    },
+    {
+        "qna_id": "68",
+        "sub_type": "description",
+        "question": "张辅攻多邦城时靠什么办法破掉安南军的象阵？",
+        "gt_chunk_ids": [
+            311,
+            312
+        ]
+    },
+    {
+        "qna_id": "69",
+        "sub_type": "description",
+        "question": "太子党反击朱高煦时，杨士奇那次答话如何改变了局面？",
+        "gt_chunk_ids": [
+            352,
+            353
+        ]
+    },
+    {
+        "qna_id": "70",
+        "sub_type": "description",
+        "question": "胡濙夜见朱棣之后，作者推理出的最后答案是什么？",
+        "gt_chunk_ids": [
+            360,
+            361
+        ]
+    },
+    {
+        "qna_id": "71",
+        "sub_type": "causation",
+        "question": "朱棣刚登基后，合法性难题的症结在哪里？",
+        "gt_chunk_ids": [
+            265
+        ]
+    },
+    {
+        "qna_id": "72",
+        "sub_type": "causation",
+        "question": "作者把姚广孝远离赏赐的根子归在哪里？",
+        "gt_chunk_ids": [
+            267
+        ]
+    },
+    {
+        "qna_id": "73",
+        "sub_type": "causation",
+        "question": "解缙从学问走向权力赌局后，作者给出的教训是什么？",
+        "gt_chunk_ids": [
+            284
+        ]
+    },
+    {
+        "qna_id": "74",
+        "sub_type": "causation",
+        "question": "郑和压住部下不打爪哇，核心考虑是什么？",
+        "gt_chunk_ids": [
+            299
+        ]
+    },
+    {
+        "qna_id": "75",
+        "sub_type": "causation",
+        "question": "朱高煦自比李世民的设计，为什么在朱棣这里走不通？",
+        "gt_chunk_ids": [
+            351
+        ]
+    },
+    {
+        "qna_id": "76",
+        "sub_type": "causation",
+        "question": "朱棣生母问题上，作者如何把官方记载和旁证接成一个结论？",
+        "gt_chunk_ids": [
+            269,
+            270
+        ]
+    },
+    {
+        "qna_id": "77",
+        "sub_type": "causation",
+        "question": "寻找朱允炆这件事为什么必须披上胡濙公干的外衣？",
+        "gt_chunk_ids": [
+            272,
+            273
+        ]
+    },
+    {
+        "qna_id": "78",
+        "sub_type": "causation",
+        "question": "瓦剌与明军在忽兰忽失温前形成决战态势的原因链条是什么？",
+        "gt_chunk_ids": [
+            323,
+            324
+        ]
+    },
+    {
+        "qna_id": "79",
+        "sub_type": "causation",
+        "question": "姚广孝临终只替溥洽求情，背后的心理原因是什么？",
+        "gt_chunk_ids": [
+            356,
+            357
+        ]
+    },
+    {
+        "qna_id": "80",
+        "sub_type": "causation",
+        "question": "朱棣那次没有打着阿鲁台的远征，为什么反而成了关键转折？",
+        "gt_chunk_ids": [
+            358,
+            359
+        ]
+    },
+    {
+        "qna_id": "81",
+        "sub_type": "description",
+        "question": "杨荣在朱棣去世后的继位暗战里承担了什么关键任务？",
+        "gt_chunk_ids": [
+            364
+        ]
+    },
+    {
+        "qna_id": "82",
+        "sub_type": "description",
+        "question": "朱高炽没有直接提高内阁学士品级时用了哪种办法解决办事难题？",
+        "gt_chunk_ids": [
+            365
+        ]
+    },
+    {
+        "qna_id": "83",
+        "sub_type": "description",
+        "question": "明仁宗朱高炽对建文旧臣家属采取了怎样的处置？",
+        "gt_chunk_ids": [
+            366
+        ]
+    },
+    {
+        "qna_id": "84",
+        "sub_type": "description",
+        "question": "朱高煦谋划截杀朱瞻基这件事后来留下了什么疑团？",
+        "gt_chunk_ids": [
+            367,
+            368
+        ]
+    },
+    {
+        "qna_id": "85",
+        "sub_type": "description",
+        "question": "朱瞻基听完昌平老农讲生活实情后回宫做了什么？",
+        "gt_chunk_ids": [
+            369
+        ]
+    },
+    {
+        "qna_id": "86",
+        "sub_type": "description",
+        "question": "朱高煦起兵前后的局势如何从枚青入京推进到朱瞻基亲征？",
+        "gt_chunk_ids": [
+            370,
+            371
+        ]
+    },
+    {
+        "qna_id": "87",
+        "sub_type": "description",
+        "question": "朱高煦在乐安城外怎样收场，而于谦又如何被写出锋芒？",
+        "gt_chunk_ids": [
+            371,
+            372
+        ]
+    },
+    {
+        "qna_id": "88",
+        "sub_type": "description",
+        "question": "被关押后的朱高煦最后是怎样走到结局的？",
+        "gt_chunk_ids": [
+            373
+        ]
+    },
+    {
+        "qna_id": "89",
+        "sub_type": "description",
+        "question": "书中把文官集团带给朱瞻基的痛苦写成了哪几层？",
+        "gt_chunk_ids": [
+            374,
+            375
+        ]
+    },
+    {
+        "qna_id": "90",
+        "sub_type": "description",
+        "question": "王振进入宫廷的经历和仁宣之后的转折是怎样连到一起的？",
+        "gt_chunk_ids": [
+            383,
+            384
+        ]
+    },
+    {
+        "qna_id": "91",
+        "sub_type": "causation",
+        "question": "马云、杨荣和金幼孜为何在朱棣去世后绕开张辅商议大事？",
+        "gt_chunk_ids": [
+            364
+        ]
+    },
+    {
+        "qna_id": "92",
+        "sub_type": "causation",
+        "question": "作者称朱高炽仁厚时，依据落在他对朋友和旧案的哪些处理上？",
+        "gt_chunk_ids": [
+            365,
+            366
+        ]
+    },
+    {
+        "qna_id": "93",
+        "sub_type": "causation",
+        "question": "作者为什么在朱高炽之死问题上只能留下朱高炽死了、朱瞻基继位这个结论？",
+        "gt_chunk_ids": [
+            367,
+            368
+        ]
+    },
+    {
+        "qna_id": "94",
+        "sub_type": "causation",
+        "question": "朱瞻基认为国家该进入休养生息的判断来自哪里？",
+        "gt_chunk_ids": [
+            369
+        ]
+    },
+    {
+        "qna_id": "95",
+        "sub_type": "causation",
+        "question": "朱瞻基从希望和平解决转为亲征朱高煦的关键依据是什么？",
+        "gt_chunk_ids": [
+            370,
+            371
+        ]
+    },
+    {
+        "qna_id": "96",
+        "sub_type": "causation",
+        "question": "那位御史为什么会被朱瞻基看作可以历练的人才？",
+        "gt_chunk_ids": [
+            372
+        ]
+    },
+    {
+        "qna_id": "97",
+        "sub_type": "causation",
+        "question": "仁宣之治被评价为盛世的根子是什么？",
+        "gt_chunk_ids": [
+            373
+        ]
+    },
+    {
+        "qna_id": "98",
+        "sub_type": "causation",
+        "question": "作者为何不接受朱瞻基只是给宦官扫盲这一解释？",
+        "gt_chunk_ids": [
+            376
+        ]
+    },
+    {
+        "qna_id": "99",
+        "sub_type": "causation",
+        "question": "司礼监和御马监成为宦官前途要地的原因分别是什么？",
+        "gt_chunk_ids": [
+            377,
+            378
+        ]
+    },
+    {
+        "qna_id": "100",
+        "sub_type": "causation",
+        "question": "皇帝把太监拉进政治制衡的根本原因在哪里？",
+        "gt_chunk_ids": [
+            379,
+            380
+        ]
+    },
+    {
+        "qna_id": "101",
+        "sub_type": "description",
+        "question": "张太皇太后那次召见最终给王振带来了什么结果？",
+        "gt_chunk_ids": [
+            388
+        ]
+    },
+    {
+        "qna_id": "102",
+        "sub_type": "description",
+        "question": "明军从大同撤回后怎样一步步失去安全退路？",
+        "gt_chunk_ids": [
+            399,
+            400
+        ]
+    },
+    {
+        "qna_id": "106",
+        "sub_type": "description",
+        "question": "马顺在追究王振余党这件事上怎样把朝堂局面引向失控？",
+        "gt_chunk_ids": [
+            420,
+            421
+        ]
+    },
+    {
+        "qna_id": "104",
+        "sub_type": "description",
+        "question": "土木堡最后关头的明军如何从城外停驻走向全军崩溃？",
+        "gt_chunk_ids": [
+            401,
+            402
+        ]
+    },
+    {
+        "qna_id": "105",
+        "sub_type": "description",
+        "question": "郭登接手大同防务后靠哪一幕重新稳住士兵？",
+        "gt_chunk_ids": [
+            429
+        ]
+    },
+    {
+        "qna_id": "103",
+        "sub_type": "description",
+        "question": "书里通过钱皇后写出了一段什么样的夫妻感情？",
+        "gt_chunk_ids": [
+            398
+        ]
+    },
+    {
+        "qna_id": "107",
+        "sub_type": "description",
+        "question": "杨洪和郭登面对朱祁镇叫门各自给出了什么回应？",
+        "gt_chunk_ids": [
+            430
+        ]
+    },
+    {
+        "qna_id": "108",
+        "sub_type": "description",
+        "question": "博罗茂洛海率军冲向德胜门后遭遇了怎样的结局？",
+        "gt_chunk_ids": [
+            439,
+            440
+        ]
+    },
+    {
+        "qna_id": "109",
+        "sub_type": "description",
+        "question": "西直门的第一轮试探进攻是如何被明军挡回去的？",
+        "gt_chunk_ids": [
+            437
+        ]
+    },
+    {
+        "qna_id": "110",
+        "sub_type": "description",
+        "question": "孙镗在西直门困局后的结局和名声如何？",
+        "gt_chunk_ids": [
+            444,
+            445
+        ]
+    },
+    {
+        "qna_id": "111",
+        "sub_type": "causation",
+        "question": "王振的祸事根源在作者看来是哪种心理和能力错位？",
+        "gt_chunk_ids": [
+            390
+        ]
+    },
+    {
+        "qna_id": "112",
+        "sub_type": "causation",
+        "question": "瓦剌与明朝从做生意走到动兵的因果链怎样形成？",
+        "gt_chunk_ids": [
+            391,
+            392
+        ]
+    },
+    {
+        "qna_id": "113",
+        "sub_type": "causation",
+        "question": "哪件结算争端最终点燃了也先与明朝的贸易矛盾？",
+        "gt_chunk_ids": [
+            392
+        ]
+    },
+    {
+        "qna_id": "114",
+        "sub_type": "causation",
+        "question": "朱祁镇成为人质后为什么会同时制造赎金压力和南迁情绪？",
+        "gt_chunk_ids": [
+            408,
+            409
+        ]
+    },
+    {
+        "qna_id": "115",
+        "sub_type": "causation",
+        "question": "徐珵主张南迁时搬出天象说法的底气从何而来？",
+        "gt_chunk_ids": [
+            410
+        ]
+    },
+    {
+        "qna_id": "116",
+        "sub_type": "causation",
+        "question": "作者为何把于谦站出来的那一步看成英雄的分界？",
+        "gt_chunk_ids": [
+            414,
+            415
+        ]
+    },
+    {
+        "qna_id": "117",
+        "sub_type": "causation",
+        "question": "于谦处理通州粮仓难题的妙处在哪里？",
+        "gt_chunk_ids": [
+            417
+        ]
+    },
+    {
+        "qna_id": "118",
+        "sub_type": "causation",
+        "question": "另立皇帝这步棋为何既化解人质危机又埋下兄弟冲突？",
+        "gt_chunk_ids": [
+            425,
+            426
+        ]
+    },
+    {
+        "qna_id": "119",
+        "sub_type": "causation",
+        "question": "也先退到关外后的攻明计划为什么走不下去？",
+        "gt_chunk_ids": [
+            450
+        ]
+    },
+    {
+        "qna_id": "120",
+        "sub_type": "causation",
+        "question": "也先撤退前后的最后一击为什么足以让他彻底败走？",
+        "gt_chunk_ids": [
+            447,
+            448
+        ]
+    },
+    {
+        "qna_id": "121",
+        "sub_type": "description",
+        "question": "朱祁镇在瓦剌营中打动了哪位看管他的重要人物？",
+        "gt_chunk_ids": [
+            451
+        ]
+    },
+    {
+        "qna_id": "122",
+        "sub_type": "description",
+        "question": "喜宁提出南侵方案后，朱祁镇怎样躲过这一关？",
+        "gt_chunk_ids": [
+            452,
+            453
+        ]
+    },
+    {
+        "qna_id": "123",
+        "sub_type": "description",
+        "question": "袁彬遇险那回是谁把他救回来的？",
+        "gt_chunk_ids": [
+            454
+        ]
+    },
+    {
+        "qna_id": "124",
+        "sub_type": "description",
+        "question": "朱祁镇铲除喜宁的圈套从设局到收网是怎么完成的？",
+        "gt_chunk_ids": [
+            455,
+            456
+        ]
+    },
+    {
+        "qna_id": "125",
+        "sub_type": "description",
+        "question": "钱皇后为等朱祁镇付出了哪些代价？",
+        "gt_chunk_ids": [
+            457
+        ]
+    },
+    {
+        "qna_id": "126",
+        "sub_type": "description",
+        "question": "王直和于谦怎样先后推动朝廷派人去瓦剌？",
+        "gt_chunk_ids": [
+            459,
+            460
+        ]
+    },
+    {
+        "qna_id": "127",
+        "sub_type": "description",
+        "question": "李实见到朱祁镇后用什么态度回应他的回家请求？",
+        "gt_chunk_ids": [
+            461
+        ]
+    },
+    {
+        "qna_id": "128",
+        "sub_type": "description",
+        "question": "伯颜帖木尔同朱祁镇分别前后是怎样坚持这段友情的？",
+        "gt_chunk_ids": [
+            467,
+            468
+        ]
+    },
+    {
+        "qna_id": "129",
+        "sub_type": "description",
+        "question": "南宫那些大树最后落得什么下场？",
+        "gt_chunk_ids": [
+            471
+        ]
+    },
+    {
+        "qna_id": "130",
+        "sub_type": "description",
+        "question": "夺门之变真正动起来后，朱祁镇最终如何重返宝座？",
+        "gt_chunk_ids": [
+            483,
+            484
+        ]
+    },
+    {
+        "qna_id": "131",
+        "sub_type": "causation",
+        "question": "作者把朱祁镇留在瓦剌后的处境称作真正绝境，依据是什么？",
+        "gt_chunk_ids": [
+            451
+        ]
+    },
+    {
+        "qna_id": "132",
+        "sub_type": "causation",
+        "question": "喜宁的南侵主意对朱祁镇为什么格外危险？",
+        "gt_chunk_ids": [
+            452,
+            453
+        ]
+    },
+    {
+        "qna_id": "133",
+        "sub_type": "causation",
+        "question": "喜宁之死给也先和朱祁镇分别带来了哪些影响？",
+        "gt_chunk_ids": [
+            456
+        ]
+    },
+    {
+        "qna_id": "134",
+        "sub_type": "causation",
+        "question": "于谦在北京保卫战后为何只接受少保，却仍不断招来攻击？",
+        "gt_chunk_ids": [
+            457,
+            458
+        ]
+    },
+    {
+        "qna_id": "135",
+        "sub_type": "causation",
+        "question": "朱祁钰同意李实出使的真正用意如何从国书和安排里看出来？",
+        "gt_chunk_ids": [
+            460
+        ]
+    },
+    {
+        "qna_id": "136",
+        "sub_type": "causation",
+        "question": "杨善能成为接回朱祁镇的关键人物，原因落在哪两层？",
+        "gt_chunk_ids": [
+            463,
+            464
+        ]
+    },
+    {
+        "qna_id": "137",
+        "sub_type": "causation",
+        "question": "杨善面对也先责难时靠什么把局面稳住？",
+        "gt_chunk_ids": [
+            466
+        ]
+    },
+    {
+        "qna_id": "138",
+        "sub_type": "causation",
+        "question": "朱祁镇临行前的阻力和离别为什么都落在伯颜帖木尔身上？",
+        "gt_chunk_ids": [
+            467,
+            468
+        ]
+    },
+    {
+        "qna_id": "139",
+        "sub_type": "causation",
+        "question": "作者说权力最终让朱祁钰疯狂，依据是什么？",
+        "gt_chunk_ids": [
+            478
+        ]
+    },
+    {
+        "qna_id": "140",
+        "sub_type": "causation",
+        "question": "石亨集团必须拉徐有贞入伙的原因和方案风险分别是什么？",
+        "gt_chunk_ids": [
+            480,
+            481
+        ]
+    }
+]

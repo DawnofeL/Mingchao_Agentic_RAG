@@ -1,0 +1,1050 @@
+[
+  {
+    "qna_id": 1,
+    "sub_type": "people",
+    "question": "元末反元阵营里谁承担过红巾军首领、统帅或共主角色？",
+    "keypoints": [
+      {
+        "answer": "朱元璋",
+        "score": 0
+      },
+      {
+        "answer": "韩山童",
+        "score": 0
+      },
+      {
+        "answer": "刘福通",
+        "score": 1
+      },
+      {
+        "answer": "郭子兴",
+        "score": 1
+      },
+      {
+        "answer": "徐寿辉",
+        "score": 1
+      },
+      {
+        "answer": "韩林儿",
+        "score": 1
+      }
+    ],
+    "llm_results": "元末反元阵营中承担过红巾军首领、统帅或共主角色的有刘福通[people_id=6]、郭子兴[people_id=8]、徐寿辉[people_id=13]、陈友谅[people_id=14]、韩林儿[people_id=21]。",
+    "score": {
+      "0": 2,
+      "1": 4
+    }
+  },
+  {
+    "qna_id": 2,
+    "sub_type": "people",
+    "question": "朱元璋阵营里被概括为明初宿将、明军第一名将、明军名将、开国名将或明军宿将的将领请列出。",
+    "keypoints": [
+      {
+        "answer": "汤和",
+        "score": 1
+      },
+      {
+        "answer": "徐达",
+        "score": 1
+      },
+      {
+        "answer": "傅友德",
+        "score": 1
+      },
+      {
+        "answer": "邓愈",
+        "score": 1
+      },
+      {
+        "answer": "郭兴",
+        "score": 1
+      },
+      {
+        "answer": "李文忠",
+        "score": 1
+      }
+    ],
+    "llm_results": "明初宿将、明军第一名将、明军名将、开国名将或明军宿将概括的将领包括：汤和[people_id=7]、徐达[people_id=10]、傅友德[people_id=17]、邓愈[people_id=23]、郭兴[people_id=25]、李文忠[people_id=29]。",
+    "score": {
+      "0": 0,
+      "1": 6
+    }
+  },
+  {
+    "qna_id": 3,
+    "sub_type": "people",
+    "question": "洪武年间围绕开国功臣结局、丞相大案、文臣连坐、广州镇将酷刑、财政大案和北伐主帅清洗的代表人物分别是谁？",
+    "keypoints": [
+      {
+        "answer": "李善长",
+        "score": 1
+      },
+      {
+        "answer": "胡惟庸",
+        "score": 1
+      },
+      {
+        "answer": "宋濂",
+        "score": 0
+      },
+      {
+        "answer": "朱亮祖",
+        "score": 1
+      },
+      {
+        "answer": "郭桓",
+        "score": 1
+      },
+      {
+        "answer": "蓝玉",
+        "score": 0
+      }
+    ],
+    "llm_results": "洪武年间围绕开国功臣结局的代表人物是李善长、蓝玉、冯胜、傅友德、王弼、周德兴和汤和[chunk_id=137,144,155,170]；围绕丞相大案的代表人物是李善长[people_id=11]和胡惟庸[people_id=32]；根据现有资料，无法回答文臣连坐部分；围绕广州镇将酷刑的代表人物是朱亮祖[people_id=35]；围绕财政大案的代表人物是郭桓[people_id=38]；根据现有资料，无法回答北伐主帅清洗部分。",
+    "score": {
+      "0": 2,
+      "1": 4
+    }
+  },
+  {
+    "qna_id": 4,
+    "sub_type": "people",
+    "question": "建文阵营中分别承担削藩执行、削藩谋划、京城救急、老成守城、前线追逼、济南死守、山东主战和殉节抗诏等抵抗角色的是哪几位？",
+    "keypoints": [
+      {
+        "answer": "齐泰",
+        "score": 1
+      },
+      {
+        "answer": "黄子澄",
+        "score": 1
+      },
+      {
+        "answer": "徐辉祖",
+        "score": 0
+      },
+      {
+        "answer": "耿炳文",
+        "score": 0
+      },
+      {
+        "answer": "平安",
+        "score": 1
+      },
+      {
+        "answer": "铁铉",
+        "score": 1
+      },
+      {
+        "answer": "盛庸",
+        "score": 0
+      },
+      {
+        "answer": "方孝孺",
+        "score": 1
+      }
+    ],
+    "llm_results": "建文阵营中，承担削藩执行角色的是齐泰[people_id=48]和黄子澄[people_id=49]，承担削藩谋划角色的是齐泰[people_id=45]和黄子澄[people_id=45]，根据现有资料，无法回答京城救急部分，根据现有资料，无法回答老成守城部分，承担前线追逼角色的是平安[people_id=56]，承担济南死守角色的是铁铉[people_id=57]和盛庸[people_id=58]，承担山东主战角色的是铁铉[people_id=57]，承担殉节抗诏角色的是方孝孺[people_id=61]。",
+    "score": {
+      "0": 3,
+      "1": 5
+    }
+  },
+  {
+    "qna_id": 5,
+    "sub_type": "people",
+    "question": "土木堡后，哪些人分别主导京师守战、大同拒门、宣府拒门和安定门骑兵反击？",
+    "keypoints": [
+      {
+        "answer": "于谦",
+        "score": 1
+      },
+      {
+        "answer": "郭登",
+        "score": 1
+      },
+      {
+        "answer": "杨洪",
+        "score": 1
+      },
+      {
+        "answer": "石亨",
+        "score": 0
+      }
+    ],
+    "llm_results": "于谦[people_id=84]主导了京师守战[chunk_id=416,418,432]和安定门骑兵反击，郭登[people_id=90]主导了大同拒门，杨洪[people_id=91]主导了宣府拒门。",
+    "score": {
+      "0": 1,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 6,
+    "sub_type": "people",
+    "question": "朱元璋最倚重的主力大将是哪一位？",
+    "keypoints": [
+      {
+        "answer": "徐达",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱元璋[people_id=1]最倚重的主力大将是徐达。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 7,
+    "sub_type": "people",
+    "question": "陈友谅身边最受信赖的猛将是谁？",
+    "keypoints": [
+      {
+        "answer": "张定边",
+        "score": 1
+      }
+    ],
+    "llm_results": "陈友谅身边最受信赖的猛将是张定边。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 8,
+    "sub_type": "people",
+    "question": "朱棣夺位和建国过程中最核心的僧人谋主是哪位？",
+    "keypoints": [
+      {
+        "answer": "姚广孝",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱棣夺位和建国过程中最核心的僧人谋主是姚广孝。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 9,
+    "sub_type": "people",
+    "question": "张太皇太后曾当殿敕戒并严禁干政的对象叫什么名字？",
+    "keypoints": [
+      {
+        "answer": "王振",
+        "score": 1
+      }
+    ],
+    "llm_results": "张太皇太后[people_id=83]曾当殿敕戒并严禁干政的对象是王振。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 10,
+    "sub_type": "people",
+    "question": "大同城下顶住也先挟帝逼门压力的是哪名守将？",
+    "keypoints": [
+      {
+        "answer": "郭登",
+        "score": 1
+      }
+    ],
+    "llm_results": "大同城下顶住也先挟帝逼门压力的守将是郭登[people_id=90]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 11,
+    "sub_type": "people",
+    "question": "谁担任过御史中丞并在洪武初年主持司法？",
+    "keypoints": [
+      {
+        "answer": "刘基",
+        "score": 1
+      }
+    ],
+    "llm_results": "刘基[people_id=19]担任过御史中丞并在洪武初年主持司法。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 12,
+    "sub_type": "people",
+    "question": "征虏大将军兼辽东远征主帅是哪位国公？",
+    "keypoints": [
+      {
+        "answer": "冯胜",
+        "score": 1
+      }
+    ],
+    "llm_results": "征虏大将军兼辽东远征主帅是宋国公冯胜[people_id=39]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 13,
+    "sub_type": "people",
+    "question": "承担秘密寻访建文帝下落任务的人是谁？",
+    "keypoints": [
+      {
+        "answer": "胡濙",
+        "score": 1
+      }
+    ],
+    "llm_results": "承担秘密寻访建文帝下落任务的人是胡濙[people_id=62]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 14,
+    "sub_type": "people",
+    "question": "下西洋统帅这一远航重任落在哪位内官身上？",
+    "keypoints": [
+      {
+        "answer": "郑和",
+        "score": 1
+      }
+    ],
+    "llm_results": "下西洋统帅这一远航重任落在郑和[people_id=65]身上。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 15,
+    "sub_type": "people",
+    "question": "京师骑兵主将和安定门守将对应哪位武臣？",
+    "keypoints": [
+      {
+        "answer": "石亨",
+        "score": 1
+      }
+    ],
+    "llm_results": "京师骑兵主将和安定门守将均对应石亨[people_id=92]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 16,
+    "sub_type": "people",
+    "question": "马秀英的养女出身、夫妻身份、以及她在宫中保全过的人分别是什么？",
+    "keypoints": [
+      {
+        "answer": "郭子兴义女",
+        "score": 1
+      },
+      {
+        "answer": "朱元璋正妻",
+        "score": 1
+      },
+      {
+        "answer": "保全李文忠、宋濂",
+        "score": 1
+      }
+    ],
+    "llm_results": "马秀英是郭子兴义女[people_id=9]，丈夫是朱元璋[people_id=9]，在宫中保全过宋濂和李文忠。",
+    "score": {
+      "0": 0,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 17,
+    "sub_type": "people",
+    "question": "刘基入幕后的战略身份、洪武初年的官职、党争中的阵营身份怎样对应？",
+    "keypoints": [
+      {
+        "answer": "战略参议",
+        "score": 1
+      },
+      {
+        "answer": "御史中丞",
+        "score": 1
+      },
+      {
+        "answer": "浙东集团领袖",
+        "score": 1
+      }
+    ],
+    "llm_results": "刘基入幕后的战略身份是应天谋臣、战略参议及军政顾问[people_id=19]，洪武初年担任御史中丞[people_id=19]，在党争中属于浙东集团领袖[people_id=19]。",
+    "score": {
+      "0": 0,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 18,
+    "sub_type": "people",
+    "question": "朱高炽在靖难守城、永乐储位和洪熙登基后的身份变化如何排列？",
+    "keypoints": [
+      {
+        "answer": "北平守城主将",
+        "score": 1
+      },
+      {
+        "answer": "明朝太子",
+        "score": 1
+      },
+      {
+        "answer": "洪熙皇帝",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱高炽在靖难守城、永乐储位和洪熙登基后的身份变化依次排列为：燕王世子[people_id=54]和北平守城主将[people_id=54]、太子[people_id=54]、皇帝[people_id=54]。",
+    "score": {
+      "0": 0,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 19,
+    "sub_type": "people",
+    "question": "请列出于谦在土木堡后的军事职责、战后朝局角色和最终冤案身份。",
+    "keypoints": [
+      {
+        "answer": "京师统帅",
+        "score": 1
+      },
+      {
+        "answer": "战后统筹者",
+        "score": 1
+      },
+      {
+        "answer": "于谦案受害者",
+        "score": 1
+      }
+    ],
+    "llm_results": "于谦在土木堡后担任兵部尚书[people_id=84]，主持北京保卫战并统筹京师防务[people_id=84]；战后继续担任兵部尚书[people_id=84]，统筹军政并斡旋朝局[people_id=84]；其最终冤案身份是“迎立外藩”的罪名受害者[people_id=84]。",
+    "score": {
+      "0": 0,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 20,
+    "sub_type": "people",
+    "question": "朱高煦从永乐争储到宣德叛乱的三重身份如何概括？",
+    "keypoints": [
+      {
+        "answer": "储位竞争者",
+        "score": 0
+      },
+      {
+        "answer": "争储失败的藩王",
+        "score": 1
+      },
+      {
+        "answer": "乐安叛乱首领",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱高煦的三重身份可概括为靖难功臣[people_id=64]、争储失败的藩王[people_id=64]以及乐安叛乱首领[people_id=64]。",
+    "score": {
+      "0": 1,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 21,
+    "sub_type": "people",
+    "question": "朱文正派谁突围前往应天求援，这个人最终抵达了哪位主帅处？",
+    "keypoints": [
+      {
+        "answer": "张子明在洪都危急时奉命突围前往应天求援",
+        "score": 1
+      },
+      {
+        "answer": "张子明在洪都危急时奉命突围前往应天求援，昼伏夜行，历半月方抵达朱元璋处",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱文正[people_id=22]派张子明突围前往应天求援，张子明最终抵达了朱元璋[people_id=1]处。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 22,
+    "sub_type": "people",
+    "question": "康茂才用假情报诱导哪位旧主走向伏击场，这个受骗者最信赖的猛将是谁？",
+    "keypoints": [
+      {
+        "answer": "正是这层战略欺骗，迫使陈友谅在关键时刻失去判断，转而走向朱元璋预设的伏击场",
+        "score": 1
+      },
+      {
+        "answer": "张定边出身沔阳渔家，是陈友谅最勇猛也最受信任的将领",
+        "score": 1
+      }
+    ],
+    "llm_results": "康茂才用假情报诱导陈友谅走向伏击场，这个受骗者最信赖的猛将是张定边。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 23,
+    "sub_type": "people",
+    "question": "哪位僧人在洪武十八年主动归附燕王朱棣，此人临终请求释放谁？",
+    "keypoints": [
+      {
+        "answer": "姚广孝主动归附燕王朱棣",
+        "score": 1
+      },
+      {
+        "answer": "姚广孝只求释放溥洽",
+        "score": 1
+      }
+    ],
+    "llm_results": "洪武十八年主动归附燕王朱棣的僧人是姚广孝[people_id=50]，此人临终请求释放溥洽[people_id=50]。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 24,
+    "sub_type": "people",
+    "question": "朱高炽依靠谁秘密返京报丧完成继位，这位阁臣后来辅佐的亲征皇帝叫什么名字？",
+    "keypoints": [
+      {
+        "answer": "杨荣在秘不发丧的安排下昼夜返京传达遗命",
+        "score": 1
+      },
+      {
+        "answer": "洪熙、宣德两朝，杨荣既是三杨格局的重要一角，又在乐安之变中主张朱瞻基亲征",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱高炽依靠杨荣[people_id=54]秘密返京报丧完成继位，这位阁臣后来辅佐的亲征皇帝叫朱瞻基[people_id=75]。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 25,
+    "sub_type": "people",
+    "question": "也先采纳哪名降敌太监的叫门与引路之策，这名太监原来随侍谁？",
+    "keypoints": [
+      {
+        "answer": "也先采纳喜宁的叫门与引路之策",
+        "score": 1
+      },
+      {
+        "answer": "喜宁原是随侍朱祁镇的太监",
+        "score": 1
+      }
+    ],
+    "llm_results": "也先采纳了降敌太监喜宁[people_id=87]的叫门与引路之策，喜宁原来随侍朱祁镇[people_id=87]。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 26,
+    "sub_type": "people",
+    "question": "北京保卫战后转向议和、直接看管朱祁镇、或在瓦剌营中忠于朱祁镇的蒙古草原人物分别是谁？",
+    "keypoints": [
+      {
+        "answer": "脱脱不花",
+        "score": 1
+      },
+      {
+        "answer": "伯颜帖木儿",
+        "score": 1
+      },
+      {
+        "answer": "哈铭",
+        "score": 0
+      }
+    ],
+    "llm_results": "北京保卫战后转向议和的蒙古草原人物是脱脱不花[people_id=93]，直接看管朱祁镇以及在瓦剌营中忠于朱祁镇的蒙古草原人物均是伯颜帖木儿[people_id=94]。",
+    "score": {
+      "0": 1,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 27,
+    "sub_type": "people",
+    "question": "哪些宦官在景泰朝南宫旧物冤案里直接成了受害者？",
+    "keypoints": [
+      {
+        "answer": "阮浪",
+        "score": 1
+      },
+      {
+        "answer": "王瑶",
+        "score": 1
+      }
+    ],
+    "llm_results": "阮浪和王瑶[chunk_id=471,472]。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 28,
+    "sub_type": "people",
+    "question": "哪位直言老臣与哪两位复储倡议者在景泰后期复储之议中公开为朱见深发声？",
+    "keypoints": [
+      {
+        "answer": "王直",
+        "score": 1
+      },
+      {
+        "answer": "钟同",
+        "score": 1
+      },
+      {
+        "answer": "章纶",
+        "score": 1
+      }
+    ],
+    "llm_results": "在景泰后期复储之议中公开为朱见深发声的直言老臣是王直[people_id=98]，两位复储倡议者是钟同[people_id=107]和章纶[people_id=108]。",
+    "score": {
+      "0": 0,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 29,
+    "sub_type": "people",
+    "question": "混派掌门和混派大弟子在成化后期分别是谁？",
+    "keypoints": [
+      {
+        "answer": "万安",
+        "score": 1
+      },
+      {
+        "answer": "刘吉",
+        "score": 1
+      }
+    ],
+    "llm_results": "成化后期混派掌门是万安[people_id=130]，混派大弟子是刘吉[people_id=132]。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 30,
+    "sub_type": "people",
+    "question": "宁王阵营中担任谋士或叛军参谋的文臣有哪些？",
+    "keypoints": [
+      {
+        "answer": "刘养正",
+        "score": 1
+      },
+      {
+        "answer": "李士实",
+        "score": 1
+      }
+    ],
+    "llm_results": "宁王阵营中担任谋士或叛军参谋的文臣有刘养正[people_id=165]、李士实[people_id=184]。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 31,
+    "sub_type": "people",
+    "question": "朱祁镇被俘后始终陪伴并为他暖脚护持的人是谁？",
+    "keypoints": [
+      {
+        "answer": "袁彬",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱祁镇被俘后始终陪伴并为他暖脚护持的人是袁彬。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 32,
+    "sub_type": "people",
+    "question": "成化后宫里违抗万贵妃命令、把朱祐樘秘密藏养起来的人是哪位？",
+    "keypoints": [
+      {
+        "answer": "张敏",
+        "score": 1
+      }
+    ],
+    "llm_results": "成化后宫里违抗万贵妃命令、把朱祐樘秘密藏养起来的人是张敏[people_id=126]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 33,
+    "sub_type": "people",
+    "question": "公开承担成化朝废西厂奏疏责任的内阁大臣是谁？",
+    "keypoints": [
+      {
+        "answer": "商辂",
+        "score": 1
+      }
+    ],
+    "llm_results": "公开承担成化朝废西厂奏疏责任的内阁大臣是商辂[people_id=131]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 34,
+    "sub_type": "people",
+    "question": "正德初年把捕杀八虎计划泄露给刘瑾的文官是谁？",
+    "keypoints": [
+      {
+        "answer": "焦芳",
+        "score": 1
+      }
+    ],
+    "llm_results": "正德初年把捕杀八虎计划泄露给刘瑾的文官是焦芳[people_id=147]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 35,
+    "sub_type": "people",
+    "question": "哪位官员在朱宸濠公开起兵时与孙燧一起怒斥宁王并殉难？",
+    "keypoints": [
+      {
+        "answer": "许逵",
+        "score": 1
+      }
+    ],
+    "llm_results": "与孙燧一起怒斥宁王并殉难的官员是许逵。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 36,
+    "sub_type": "people",
+    "question": "担任南宫少监并服侍朱祁镇的宦官是谁？",
+    "keypoints": [
+      {
+        "answer": "阮浪",
+        "score": 1
+      }
+    ],
+    "llm_results": "担任南宫少监并服侍朱祁镇的宦官是阮浪[people_id=101]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 37,
+    "sub_type": "people",
+    "question": "成化朝东厂掌印太监是哪位？",
+    "keypoints": [
+      {
+        "answer": "尚铭",
+        "score": 1
+      }
+    ],
+    "llm_results": "成化朝东厂掌印太监是尚铭[people_id=129]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 38,
+    "sub_type": "people",
+    "question": "弘治元年被重新任命为吏部尚书、负责整顿官场的人是谁？",
+    "keypoints": [
+      {
+        "answer": "王恕",
+        "score": 1
+      }
+    ],
+    "llm_results": "弘治元年被重新任命为吏部尚书、负责整顿官场的人是王恕[people_id=135]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 39,
+    "sub_type": "people",
+    "question": "正德朝担任三边总制并布局除掉刘瑾的边防重臣是谁？",
+    "keypoints": [
+      {
+        "answer": "杨一清",
+        "score": 1
+      }
+    ],
+    "llm_results": "正德朝担任三边总制并布局除掉刘瑾的边防重臣是杨一清。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 40,
+    "sub_type": "people",
+    "question": "正德十四年安庆知府、协同杨锐守城的人是谁？",
+    "keypoints": [
+      {
+        "answer": "张文锦",
+        "score": 1
+      }
+    ],
+    "llm_results": "正德十四年安庆知府、协同杨锐守城的人是张文锦[people_id=171]。",
+    "score": {
+      "0": 0,
+      "1": 1
+    }
+  },
+  {
+    "qna_id": 41,
+    "sub_type": "people",
+    "question": "汪直在成化朝的出身去向、依附对象和特务机构身份分别是什么？",
+    "keypoints": [
+      {
+        "answer": "汪直原是韩雍平定两广后带回京城的俘虏，入宫后成为宦官",
+        "score": 1
+      },
+      {
+        "answer": "万贵妃旧属",
+        "score": 1
+      },
+      {
+        "answer": "西厂创建者",
+        "score": 1
+      }
+    ],
+    "llm_results": "汪直[people_id=125]原是韩雍平定两广后带回京城的俘虏，入宫成为宦官，依附对象是万贵妃，创办并掌管西厂，最终被贬南京并退出成化权力中心。",
+    "score": {
+      "0": 0,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 42,
+    "sub_type": "people",
+    "question": "怀恩在保护储位、重整监派和清退混派时分别承担了什么角色？",
+    "keypoints": [
+      {
+        "answer": "朱祐樘保护者",
+        "score": 1
+      },
+      {
+        "answer": "东厂重整者",
+        "score": 1
+      },
+      {
+        "answer": "奉命逼退万安",
+        "score": 1
+      }
+    ],
+    "llm_results": "怀恩在保护储位时以死拒绝执行废储命令[people_id=134]，在重整监派时安排亲信掌东厂并保留监派中相对稳健的力量[people_id=134]，在清退混派时奉命逼退万安以促成混派瓦解[people_id=134]。",
+    "score": {
+      "0": 0,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 43,
+    "sub_type": "people",
+    "question": "王守仁在宁王之乱前后的思想身份、军事身份和江西善后立场如何对应？",
+    "keypoints": [
+      {
+        "answer": "心学创立者",
+        "score": 1
+      },
+      {
+        "answer": "宁王之乱平叛统帅",
+        "score": 1
+      },
+      {
+        "answer": "江西百姓保护者",
+        "score": 1
+      }
+    ],
+    "llm_results": "王守仁[people_id=149]在宁王之乱前后的思想身份是心学创立者、哲学家和心学家，军事身份是江西巡抚[people_id=149]、左佥都御史[people_id=149]及平叛统帅[people_id=149]，其在宁王之乱后的江西善后立场是抗命押解朱宸濠离开江西以阻止江彬借机制造大军入境，主动让出战功以保全江西百姓，并焚毁宁王账本拒绝扩大清算[people_id=149]。",
+    "score": {
+      "0": 0,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 44,
+    "sub_type": "people",
+    "question": "张永在除刘瑾、接收宁王俘虏和牵制江彬三条线上各是什么身份？",
+    "keypoints": [
+      {
+        "answer": "夜间告发刘瑾者",
+        "score": 1
+      },
+      {
+        "answer": "杭州交俘负责人",
+        "score": 0
+      },
+      {
+        "answer": "江彬制衡者",
+        "score": 1
+      }
+    ],
+    "llm_results": "张永[people_id=155]在除刘瑾中是告发者，在接收宁王俘虏时是先遣队负责人，在牵制江彬中是与乔宇互通消息、监视江彬异常行动的制衡者。",
+    "score": {
+      "0": 1,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 45,
+    "sub_type": "people",
+    "question": "朱宸濠在叛乱筹备、鄱阳湖决战和南征献俘链条中的身份分别是什么？",
+    "keypoints": [
+      {
+        "answer": "宁王之乱发动者",
+        "score": 1
+      },
+      {
+        "answer": "鄱阳湖决战叛军统帅",
+        "score": 1
+      },
+      {
+        "answer": "南京献俘对象",
+        "score": 1
+      }
+    ],
+    "llm_results": "朱宸濠[people_id=183]在叛乱筹备中的身份是叛乱发动者，在鄱阳湖决战中的身份是叛军统帅，在南征献俘链条中的身份是王守仁押解的俘虏及南京献俘对象。",
+    "score": {
+      "0": 0,
+      "1": 3
+    }
+  },
+  {
+    "qna_id": 46,
+    "sub_type": "people",
+    "question": "谁在朱祐樘出生后违抗溺杀命令把他藏养起来、后来又把真相告诉了哪位皇帝？",
+    "keypoints": [
+      {
+        "answer": "张敏奉万贵妃之命前往纪妃住处溺杀新生皇子，却选择违抗命令，将朱祐樘抱走并与宫女宦官共同秘密抚养",
+        "score": 1
+      },
+      {
+        "answer": "张敏在朱见深感叹无子时说出朱祐樘存在",
+        "score": 1
+      }
+    ],
+    "llm_results": "张敏[people_id=126]在朱祐樘出生后违抗溺杀命令把他藏养起来，后来把真相告诉了朱见深[people_id=126]。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 47,
+    "sub_type": "people",
+    "question": "孙燧把正式平叛希望托付给谁、这个人后来在鄱阳湖决战中俘获了哪位叛王？",
+    "keypoints": [
+      {
+        "answer": "临刑前把平叛希望寄托给王守仁",
+        "score": 1
+      },
+      {
+        "answer": "王守仁以诱敌、夹击、炮舰反击和夜间火攻击破叛军，七月二十六日擒获朱宸濠",
+        "score": 1
+      }
+    ],
+    "llm_results": "孙燧把正式平叛希望托付给王守仁，这个人后来在鄱阳湖决战中俘获了叛王朱宸濠[people_id=183]。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 48,
+    "sub_type": "people",
+    "question": "刘健争取哪名司礼监宦官支持捕杀八虎、这名宦官后来被刘瑾如何处理？",
+    "keypoints": [
+      {
+        "answer": "刘健随后争取王岳支持，由王岳发动其他司礼监游说朱厚照同意捕杀八虎",
+        "score": 1
+      },
+      {
+        "answer": "朱厚照最终免去王岳职务并把王岳发往南京",
+        "score": 1
+      }
+    ],
+    "llm_results": "刘健争取司礼监宦官王岳支持捕杀八虎，王岳[people_id=148]后来被刘瑾控诉与文官勾结并遭免职发往南京。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 49,
+    "sub_type": "people",
+    "question": "杨一清在宁夏说动哪名监军回京告发刘瑾、此人回京后向哪位皇帝死谏？",
+    "keypoints": [
+      {
+        "answer": "杨一清在送别宴上说服张永携带十七条罪状回京除刘瑾",
+        "score": 1
+      },
+      {
+        "answer": "张永向朱厚照呈上杨一清草拟的文书，脱帽叩头并以刘瑾夺天下后朱厚照无处可去相逼",
+        "score": 1
+      }
+    ],
+    "llm_results": "杨一清在宁夏说动监军张永[people_id=155]回京告发刘瑾，此人回京后向明武宗朱厚照[people_id=155]死谏。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  },
+  {
+    "qna_id": 50,
+    "sub_type": "people",
+    "question": "乔宇请谁判断牛首山失踪局势、这套判断又迫使哪名权臣放出朱厚照？",
+    "keypoints": [
+      {
+        "answer": "乔宇在朱厚照牛首山失踪后请王守仁判断牛首山局势",
+        "score": 1
+      },
+      {
+        "answer": "帮助迫使江彬放出失踪数十日的朱厚照",
+        "score": 1
+      }
+    ],
+    "llm_results": "乔宇请王守仁判断牛首山失踪局势，这套判断迫使江彬[people_id=157]放出朱厚照。",
+    "score": {
+      "0": 0,
+      "1": 2
+    }
+  }
+]

@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>明朝那些事儿 · RAG</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Design Tokens（对齐 flowchart 色板）────────────────── */
+:root {
+  --bg:    #ECE8DF;
+  --bg2:   #E5E0D5;
+  --dark:  #1C1A12;
+  --dark2: #262318;
+
+  --t1: #1C1A12;
+  --t2: rgba(28,26,18,0.60);
+  --t3: rgba(28,26,18,0.38);
+  --t4: rgba(28,26,18,0.16);
+  --tw:  #F4F1E8;
+  --tw2: rgba(244,241,232,0.72);
+  --tw3: rgba(244,241,232,0.40);
+
+  /* 森林 + 雪山 */
+  --moss:    #4A6741;
+  --kombu:   #2D4E30;
+  --lime:    #B6C849;
+  --glacier: #6BA8C4;
+  --snow:    #C4D8E4;
+  --cedar:   #8A5030;
+  --amber:   #B8820A;
+  --teal:    #3A6A66;
+
+  --glass:   rgba(255,255,255,0.52);
+  --gborder: rgba(255,255,255,0.65);
+  --border:  rgba(28,26,18,0.08);
+  --border2: rgba(28,26,18,0.14);
+
+  --expo:   cubic-bezier(0.16,1,0.3,1);
+  --spring: cubic-bezier(0.34,1.4,0.5,1);
+  --smooth: cubic-bezier(0.25,0.46,0.45,0.94);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  background: var(--bg);
+  color: var(--t1);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 背景三层 ───────────────────────────────────────────── */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(28,26,18,0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.grain {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+/* 雪山顶光晕 + 森林底部 */
+.bg-ambient {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 35% at 50% -5%,  rgba(107,168,196,0.12), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 6%  92%,  rgba(45,78,48,0.09),    transparent 70%),
+    radial-gradient(ellipse 45% 40% at 94% 88%,  rgba(138,80,48,0.06),   transparent 70%);
+}
+/* 雪山轮廓线（右上，从 presentation.html 学来） */
+.bg-ridge {
+  position: fixed; right: 0; top: 0; z-index: 2; pointer-events: none;
+  width: 60%; height: 100%; opacity: 0.14;
+  background:
+    radial-gradient(ellipse 600px 220px at 96% 16%, transparent 62%, rgba(107,168,196,0.6) 62.5%, transparent 63.3%),
+    radial-gradient(ellipse 720px 260px at 99% 20%, transparent 68%, rgba(107,168,196,0.38) 68.5%, transparent 69.2%),
+    radial-gradient(ellipse 860px 310px at 102% 25%, transparent 74%, rgba(107,168,196,0.22) 74.5%, transparent 75%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.85) 55%);
+}
+
+/* ══════════════════════════════════════════════════════════
+   LOADING SCREEN
+   ══════════════════════════════════════════════════════════ */
+#loading {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--bg);
+  transition: opacity 0.9s var(--smooth);
+}
+#loading.out { opacity: 0; pointer-events: none; }
+
+.ld-brand { display: flex; align-items: center; gap: 16px; margin-bottom: 56px; }
+.ld-orb {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, rgba(182,200,73,0.92), rgba(45,78,48,0.7));
+  animation: breathe 3.4s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%,100% { box-shadow: 0 0 22px rgba(182,200,73,0.22), 0 0 56px rgba(107,168,196,0.08); transform: scale(1); }
+  50%      { box-shadow: 0 0 38px rgba(182,200,73,0.46), 0 0 80px rgba(107,168,196,0.20); transform: scale(1.07); }
+}
+.ld-name { font-size: 24px; font-weight: 800; letter-spacing: 0.02em; color: var(--t1); }
+.ld-sub  {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: 0.28em; text-transform: uppercase; color: var(--t3); margin-top: 6px;
+}
+
+.ld-track { width: 260px; }
+.ld-bar   { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 14px; }
+.ld-fill  {
+  height: 100%; border-radius: 2px; width: 0%;
+  background: linear-gradient(90deg, var(--kombu), var(--lime));
+  box-shadow: 0 0 8px rgba(182,200,73,0.45);
+  transition: width 0.65s var(--smooth);
+}
+.ld-step {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--t3); text-align: center; height: 14px;
+}
+.ld-footer {
+  position: absolute; bottom: 30px;
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--t4);
+}
+
+/* ══════════════════════════════════════════════════════════
+   MAIN APP
+   ══════════════════════════════════════════════════════════ */
+#app {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.8s var(--smooth);
+}
+#app.on { opacity: 1; pointer-events: auto; }
+
+/* ── 顶栏（深色：实验室感对比） ─────────────────────────── */
+#topbar {
+  flex-shrink: 0; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 26px;
+  background: var(--dark);
+  border-bottom: 1px solid rgba(244,241,232,0.07);
+  z-index: 20;
+}
+.tb-brand { display: flex; align-items: center; gap: 11px; }
+.tb-orb {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  background: radial-gradient(circle at 35% 32%, rgba(182,200,73,0.9), rgba(45,78,48,0.55));
+  box-shadow: 0 0 10px rgba(182,200,73,0.3);
+  animation: breathe 3.8s ease-in-out infinite;
+}
+.tb-title { font-size: 13px; font-weight: 700; color: var(--tw); letter-spacing: 0.02em; }
+.tb-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 7px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--tw3); padding: 3px 8px;
+  border: 1px solid rgba(244,241,232,0.12); border-radius: 4px; margin-left: 4px;
+}
+
+.tb-right { display: flex; align-items: center; gap: 12px; }
+
+/* 模式选择器 */
+.mode-seg {
+  display: flex; align-items: center;
+  background: rgba(244,241,232,0.06); border: 1px solid rgba(244,241,232,0.10);
+  border-radius: 7px; overflow: hidden;
+}
+.mode-btn {
+  padding: 5px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--tw3); border: none; background: transparent;
+  cursor: pointer; transition: all 0.22s var(--smooth);
+}
+.mode-btn.on { background: rgba(244,241,232,0.12); color: var(--tw); }
+
+.tb-sep { width: 1px; height: 18px; background: rgba(244,241,232,0.10); }
+
+/* COT 开关 */
+.cot-row { display: flex; align-items: center; gap: 8px; }
+.cot-lbl {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--tw3);
+}
+.cot-sw {
+  width: 36px; height: 20px; border-radius: 10px;
+  background: rgba(244,241,232,0.10); border: 1px solid rgba(244,241,232,0.14);
+  position: relative; cursor: pointer;
+  transition: background 0.28s var(--smooth), border-color 0.28s ease;
+}
+.cot-sw.on { background: var(--kombu); border-color: rgba(74,103,65,0.55); }
+.cot-knob {
+  position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%;
+  background: rgba(244,241,232,0.45);
+  transition: transform 0.28s var(--spring), background 0.28s ease;
+}
+.cot-sw.on .cot-knob { transform: translateX(16px); background: var(--lime); box-shadow: 0 0 6px rgba(182,200,73,0.55); }
+
+/* ── 消息区域 ─────────────────────────────────────────────── */
+#msgs {
+  flex: 1; overflow-y: auto; padding: 36px 0 16px;
+  display: flex; flex-direction: column;
+  scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
+}
+#msgs::-webkit-scrollbar { width: 6px; }
+#msgs::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.msg-row {
+  display: flex;
+  padding: 0 max(28px, calc((100% - 800px)/2));
+  margin-bottom: 20px;
+  animation: rise-in 0.5s var(--expo) both;
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.msg-row.user      { justify-content: flex-end; }
+.msg-row.assistant { justify-content: flex-start; }
+
+/* 用户气泡 */
+.bubble-user {
+  max-width: 66%; padding: 12px 18px;
+  background: var(--dark); border: 1px solid rgba(244,241,232,0.07);
+  border-radius: 16px 16px 4px 16px;
+  font-size: 14px; line-height: 1.72; color: var(--tw);
+}
+
+/* 助手气泡 */
+.bubble-ast {
+  max-width: 80%;
+  background: var(--glass); border: 1px solid var(--gborder);
+  border-radius: 4px 16px 16px 16px;
+  box-shadow: 0 2px 14px rgba(28,26,18,0.06), inset 0 1px 0 rgba(255,255,255,0.55);
+  backdrop-filter: blur(8px); overflow: hidden;
+}
+
+/* COT 日志区 */
+.log-area {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(28,26,18,0.025);
+  display: none;
+}
+.log-area.show { display: block; }
+.log-ln {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px; line-height: 1.65; color: var(--t3);
+  white-space: pre-wrap; word-break: break-all;
+  animation: fade-ln 0.18s ease both;
+}
+@keyframes fade-ln { from { opacity:0; } to { opacity:1; } }
+.log-ln.c-plan   { color: rgba(107,168,196,0.85); }
+.log-ln.c-tool   { color: rgba(184,130,10,0.85); }
+.log-ln.c-result { color: rgba(74,103,65,0.85); }
+.log-ln.c-orch   { color: rgba(168,152,200,0.75); }
+.log-ln.c-final  { color: var(--moss); font-weight: 500; }
+
+/* 正文区 */
+.ans-area {
+  padding: 14px 18px 16px;
+  font-size: 14px; line-height: 1.88; color: var(--t1);
+}
+.cursor {
+  display: inline-block; width: 2px; height: 14px;
+  background: var(--moss); border-radius: 1px; margin-left: 2px;
+  vertical-align: middle; animation: blink 1.1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* 等待中的点动画 */
+.typing-dots { display: inline-flex; gap: 4px; align-items: center; padding: 4px 0; }
+.typing-dots span {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--t3);
+  animation: dot-pulse 1.4s ease-in-out infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dot-pulse { 0%,80%,100%{transform:scale(0.7);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+/* ── Empty state ─────────────────────────────────────────── */
+#empty {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; padding: 40px;
+  animation: rise-in 0.7s var(--expo);
+}
+.empty-orb {
+  width: 62px; height: 62px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, rgba(182,200,73,0.55), rgba(45,78,48,0.28));
+  box-shadow: 0 0 30px rgba(182,200,73,0.14), 0 0 64px rgba(107,168,196,0.07);
+  animation: breathe 4s ease-in-out infinite;
+  margin-bottom: 4px;
+}
+.empty-title { font-size: 20px; font-weight: 800; color: var(--t1); }
+.empty-sub {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--t3); text-align: center;
+}
+.hint-list { display: flex; flex-direction: column; gap: 9px; margin-top: 10px; align-items: center; }
+.hint-chip {
+  padding: 9px 20px;
+  background: var(--glass); border: 1px solid var(--gborder);
+  border-radius: 22px; font-size: 13.5px; color: var(--t2);
+  cursor: pointer; transition: all 0.22s var(--smooth);
+  box-shadow: 0 2px 10px rgba(28,26,18,0.04), inset 0 1px 0 rgba(255,255,255,0.6);
+  user-select: none;
+}
+.hint-chip:hover {
+  background: rgba(255,255,255,0.72); border-color: rgba(255,255,255,0.8);
+  color: var(--t1); transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(28,26,18,0.08);
+}
+.hint-chip:active { transform: translateY(0); }
+
+/* ── 输入栏 ───────────────────────────────────────────────── */
+#inputbar {
+  flex-shrink: 0; padding: 14px 26px 18px;
+  background: rgba(236,232,223,0.82);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+}
+.inp-row {
+  display: flex; align-items: flex-end; gap: 10px;
+  max-width: 800px; margin: 0 auto;
+}
+.inp-wrap { flex: 1; position: relative; }
+#qinput {
+  width: 100%; min-height: 44px; max-height: 130px;
+  padding: 11px 16px; resize: none; overflow-y: auto;
+  background: rgba(255,255,255,0.62); border: 1px solid var(--border2);
+  border-radius: 11px;
+  font-family: 'Be Vietnam Pro', sans-serif; font-size: 14px;
+  line-height: 1.55; color: var(--t1); outline: none;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+  box-shadow: 0 2px 10px rgba(28,26,18,0.05), inset 0 1px 0 rgba(255,255,255,0.6);
+  scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
+}
+#qinput::placeholder { color: var(--t3); }
+#qinput:focus {
+  border-color: rgba(74,103,65,0.45);
+  box-shadow: 0 0 0 3px rgba(74,103,65,0.08), 0 2px 10px rgba(28,26,18,0.05);
+}
+.send-btn {
+  width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0;
+  background: var(--kombu); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(244,241,232,0.92);
+  box-shadow: 0 3px 12px rgba(45,78,48,0.32);
+  transition: all 0.22s var(--smooth);
+}
+.send-btn:hover { background: var(--moss); transform: translateY(-1px); box-shadow: 0 5px 18px rgba(45,78,48,0.45); }
+.send-btn:active { transform: translateY(0); }
+.send-btn.busy { background: rgba(28,26,18,0.2); cursor: not-allowed; transform: none; box-shadow: none; }
+.send-btn svg { width: 17px; height: 17px; }
+.inp-foot {
+  max-width: 800px; margin: 7px auto 0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.inp-hint {
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--t4);
+}
+.mode-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px;
+  letter-spacing: 0.14em; text-transform: uppercase; padding: 3px 9px;
+  background: rgba(45,78,48,0.10); color: rgba(74,103,65,0.85);
+  border: 1px solid rgba(45,78,48,0.18); border-radius: 4px;
+}
+
+/* ── 配置面板（Modal）──────────────────────────────────────── */
+.cfg-overlay {
+  position: fixed; inset: 0; z-index: 80;
+  background: rgba(28,26,18,0.42); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+}
+.cfg-overlay.open { display: flex; }
+.cfg-modal {
+  width: 380px; background: var(--bg);
+  border: 1px solid var(--border2); border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(28,26,18,0.22);
+  overflow: hidden;
+}
+.cfg-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.cfg-title { font-size: 13px; font-weight: 700; color: var(--t1); letter-spacing: 0.02em; }
+.cfg-close {
+  width: 24px; height: 24px; border-radius: 6px; border: none;
+  background: var(--border); color: var(--t2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+  transition: background 0.18s ease;
+}
+.cfg-close:hover { background: var(--border2); }
+.cfg-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.cfg-note {
+  font-family: 'Be Vietnam Pro', sans-serif; font-size: 12px; line-height: 1.55;
+  color: var(--t2); background: rgba(184,130,10,0.08);
+  border: 1px solid rgba(184,130,10,0.22); border-radius: 8px; padding: 9px 11px;
+}
+.cfg-note b { color: var(--t1); font-weight: 600; }
+.cfg-field { display: flex; flex-direction: column; gap: 5px; }
+.cfg-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--t3);
+}
+.cfg-input {
+  width: 100%; padding: 9px 12px; border-radius: 8px;
+  background: rgba(255,255,255,0.55); border: 1px solid var(--border2);
+  font-family: 'Be Vietnam Pro', sans-serif; font-size: 13px; color: var(--t1);
+  outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.cfg-input:focus { border-color: rgba(74,103,65,0.45); box-shadow: 0 0 0 3px rgba(74,103,65,0.08); }
+.cfg-input::placeholder { color: var(--t3); }
+.cfg-row { display: flex; align-items: center; justify-content: space-between; }
+.cfg-footer {
+  padding: 14px 20px 18px; border-top: 1px solid var(--border);
+  display: flex; gap: 9px; justify-content: flex-end;
+}
+.cfg-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 7px 16px; border-radius: 7px; border: 1px solid var(--border2);
+  background: transparent; color: var(--t2); cursor: pointer; transition: all 0.18s ease;
+}
+.cfg-btn:hover { background: var(--border); color: var(--t1); }
+.cfg-btn.primary {
+  background: var(--kombu); border-color: var(--kombu); color: rgba(244,241,232,0.92);
+}
+.cfg-btn.primary:hover { background: var(--moss); border-color: var(--moss); }
+.cfg-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 7px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px; margin-left: 6px;
+  background: rgba(107,168,196,0.18); color: var(--glacier); border: 1px solid rgba(107,168,196,0.3);
+  display: none;
+}
+.cfg-badge.show { display: inline; }
+
+/* ── 配置按钮（顶栏）──────────────────────────────────────── */
+.tb-cfg-btn {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: rgba(244,241,232,0.06); border: 1px solid rgba(244,241,232,0.10);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--tw3); cursor: pointer; transition: all 0.22s var(--smooth);
+}
+.tb-cfg-btn:hover { background: rgba(244,241,232,0.12); color: var(--tw2); }
+.tb-cfg-btn.active { background: rgba(184,130,10,0.22); color: var(--amber); border-color: rgba(184,130,10,0.35); }
+.tb-cfg-btn svg { width: 13px; height: 13px; }
+
+/* ── 停止按钮 ─────────────────────────────────────────────── */
+.stop-btn {
+  width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0;
+  background: rgba(28,26,18,0.06); border: 1px solid var(--border2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--t3); transition: all 0.22s var(--smooth);
+}
+.stop-btn:hover { background: rgba(184,130,10,0.10); color: var(--amber); border-color: rgba(184,130,10,0.22); }
+.stop-btn.active { background: rgba(200,60,60,0.11); color: #c84040; border-color: rgba(200,60,60,0.28); }
+.stop-btn.active:hover { background: rgba(200,60,60,0.20); }
+.stop-btn svg { width: 14px; height: 14px; }
+
+/* ── 历史按钮（顶栏）──────────────────────────────────────── */
+.tb-hist-btn {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: rgba(244,241,232,0.06); border: 1px solid rgba(244,241,232,0.10);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--tw3); cursor: pointer; transition: all 0.22s var(--smooth);
+}
+.tb-hist-btn:hover { background: rgba(244,241,232,0.12); color: var(--tw2); }
+.tb-hist-btn.on { background: rgba(107,168,196,0.20); color: var(--glacier); border-color: rgba(107,168,196,0.3); }
+.tb-hist-btn svg { width: 13px; height: 13px; }
+
+/* ── 历史面板（右侧边栏）──────────────────────────────────── */
+.history-panel {
+  position: fixed; right: 0; top: 56px; bottom: 0; z-index: 30;
+  width: 300px; background: var(--bg);
+  border-left: 1px solid var(--border2);
+  box-shadow: -4px 0 20px rgba(28,26,18,0.08);
+  transform: translateX(100%);
+  transition: transform 0.32s var(--expo);
+  display: flex; flex-direction: column;
+}
+.history-panel.open { transform: translateX(0); }
+.hp-header {
+  padding: 16px 18px 14px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.hp-title { font-size: 12px; font-weight: 700; color: var(--t1); letter-spacing: 0.02em; }
+.hp-actions { display: flex; gap: 8px; align-items: center; }
+.hp-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 5px;
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--t2); cursor: pointer; transition: all 0.18s ease;
+}
+.hp-btn:hover { background: var(--border); color: var(--t1); }
+.hp-btn.danger:hover { background: rgba(200,60,60,0.10); color: #c84040; border-color: rgba(200,60,60,0.3); }
+.hp-body {
+  flex: 1; overflow-y: auto; padding: 12px 16px;
+  scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
+}
+.hp-turn {
+  margin-bottom: 16px; padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.hp-turn:last-child { border-bottom: none; margin-bottom: 0; }
+.hp-role {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--t3); margin-bottom: 5px;
+}
+.hp-content { font-size: 12px; line-height: 1.6; color: var(--t2); white-space: pre-wrap; word-break: break-word; }
+.hp-empty {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: 0.12em; color: var(--t4); text-align: center; padding-top: 40px;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ LLM CONFIG MODAL ══════ -->
+<div class="cfg-overlay" id="cfg-overlay" onclick="closeCfgIfOutside(event)">
+  <div class="cfg-modal">
+    <div class="cfg-header">
+      <span class="cfg-title">LLM 配置 <span class="cfg-badge" id="cfg-badge">已覆盖</span></span>
+      <button class="cfg-close" onclick="closeCfg()">✕</button>
+    </div>
+    <div class="cfg-body">
+      <div class="cfg-note">
+        本项目仅适配通义千问 <b>Qwen</b> 系列，接口走阿里云 DashScope。推荐
+        <b>qwen3.7-plus</b> 及以上，效果最佳。留空则使用默认配置（含环境变量 <b>DASHSCOPE_API_KEY</b>）。
+      </div>
+      <div class="cfg-field">
+        <span class="cfg-label">Model</span>
+        <input class="cfg-input" id="cfg-model" type="text" placeholder="使用默认模型">
+      </div>
+      <div class="cfg-field">
+        <span class="cfg-label">API Key</span>
+        <input class="cfg-input" id="cfg-apikey" type="password" placeholder="使用默认密钥">
+      </div>
+      <div class="cfg-field">
+        <div class="cfg-row">
+          <span class="cfg-label">Enable Thinking</span>
+          <div class="cot-sw" id="cfg-thinking-sw" onclick="toggleCfgThinking()">
+            <div class="cot-knob"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cfg-footer">
+      <button class="cfg-btn" onclick="resetCfg()">重置默认</button>
+      <button class="cfg-btn primary" onclick="applyCfg()">应用</button>
+    </div>
+  </div>
+</div>
+
+<div class="bg-grid"></div>
+<div class="grain"></div>
+<div class="bg-ambient"></div>
+<div class="bg-ridge"></div>
+
+<!-- ══════ LOADING ══════ -->
+<div id="loading">
+  <div class="ld-brand">
+    <div class="ld-orb"></div>
+    <div>
+      <div class="ld-name">明朝那些事儿</div>
+      <div class="ld-sub">Agentic RAG · V2</div>
+    </div>
+  </div>
+  <div class="ld-track">
+    <div class="ld-bar"><div class="ld-fill" id="ld-fill"></div></div>
+    <div class="ld-step" id="ld-step">连接服务...</div>
+  </div>
+  <div class="ld-footer">RAG_Ming_Refine · BGE-M3 + Milvus Lite</div>
+</div>
+
+<!-- ══════ MAIN APP ══════ -->
+<div id="app">
+  <div id="topbar">
+    <div class="tb-brand">
+      <div class="tb-orb"></div>
+      <span class="tb-title">明朝那些事儿</span>
+      <span class="tb-badge">RAG V2</span>
+    </div>
+    <div class="tb-right">
+      <div class="mode-seg">
+        <button class="mode-btn" id="btn-v" onclick="setMode('vector')">Vector</button>
+        <button class="mode-btn on"  id="btn-a" onclick="setMode('agentic')">Agentic</button>
+      </div>
+      <div class="tb-sep"></div>
+      <div class="cot-row">
+        <span class="cot-lbl">CoT</span>
+        <div class="cot-sw on" id="cot-sw" onclick="toggleCOT()">
+          <div class="cot-knob"></div>
+        </div>
+      </div>
+      <div class="tb-sep"></div>
+      <button class="tb-cfg-btn" id="cfg-btn" onclick="openCfg()" title="LLM 配置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <div class="tb-sep"></div>
+      <button class="tb-hist-btn" id="hist-btn" onclick="toggleHistory()" title="对话历史">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 历史侧边栏 -->
+  <div id="history-panel" class="history-panel">
+    <div class="hp-header">
+      <span class="hp-title">对话历史</span>
+      <div class="hp-actions">
+        <button class="hp-btn danger" onclick="clearHistory()">清空</button>
+        <button class="hp-btn" onclick="toggleHistory()">关闭</button>
+      </div>
+    </div>
+    <div class="hp-body" id="hp-body"></div>
+  </div>
+
+  <div id="msgs">
+    <div id="empty">
+      <div class="empty-orb"></div>
+      <div class="empty-title">你想了解什么？</div>
+      <div class="empty-sub">明朝 · 人物 · 事件 · 时间线 · 因果分析</div>
+      <div class="hint-list">
+        <div class="hint-chip" onclick="useHint(this)">朱元璋为什么废除丞相制度？</div>
+        <div class="hint-chip" onclick="useHint(this)">靖难之役朱棣麾下立功最大的武将是谁？</div>
+        <div class="hint-chip" onclick="useHint(this)">郑和下西洋前后历时多少年？</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="inputbar">
+    <div class="inp-row">
+      <div class="inp-wrap">
+        <textarea id="qinput" placeholder="提问关于明朝的任何问题…" rows="1"></textarea>
+      </div>
+      <button class="send-btn" id="send-btn" onclick="send()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+      <button class="stop-btn" id="stop-btn" onclick="stopGeneration()" title="停止生成">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <rect x="5" y="5" width="14" height="14" rx="2"/>
+        </svg>
+      </button>
+    </div>
+    <div class="inp-foot">
+      <span class="inp-hint">Enter 发送 · Shift+Enter 换行</span>
+      <span class="mode-tag" id="mode-tag">Agentic Mode</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── 状态 ─────────────────────────────────────────────────── */
+let mode              = 'agentic';
+let cotOn             = true;
+let busy              = false;
+let history           = [];   // [{role, content}, ...]
+let genId             = 0;    // 每次发送自增，用于停止时使旧队列失效
+let currentController = null; // 当前 fetch 的 AbortController
+let historyOpen       = false;
+
+/* ── 启动：连接 /startup-progress SSE ────────────────────── */
+function initLoading() {
+  const fill = document.getElementById('ld-fill');
+  const step = document.getElementById('ld-step');
+
+  const es = new EventSource('/startup-progress');
+
+  es.onmessage = (e) => {
+    try {
+      const d = JSON.parse(e.data);
+      if (d.error) { step.textContent = '错误：' + d.error; es.close(); return; }
+      fill.style.width = (d.progress || 0) + '%';
+      step.textContent = d.step || '';
+      if (d.done) { es.close(); setTimeout(showApp, 600); }
+    } catch (_) {}
+  };
+
+  es.onerror = () => {
+    es.close();
+    // 如果直接打开 html 文件（非 app.py 启动），显示提示
+    step.textContent = '请先运行 python app.py';
+    fill.style.width = '0%';
+  };
+}
+initLoading();
+
+function showApp() {
+  document.getElementById('loading').classList.add('out');
+  setTimeout(() => {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').classList.add('on');
+    document.getElementById('qinput').focus();
+  }, 900);
+}
+
+/* ── 模式 / COT ──────────────────────────────────────────── */
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-v').classList.toggle('on', m === 'vector');
+  document.getElementById('btn-a').classList.toggle('on', m === 'agentic');
+  document.getElementById('mode-tag').textContent = m === 'agentic' ? 'Agentic Mode' : 'Vector Mode';
+}
+function toggleCOT() {
+  cotOn = !cotOn;
+  document.getElementById('cot-sw').classList.toggle('on', cotOn);
+  document.querySelectorAll('.log-area').forEach(el => el.classList.toggle('show', cotOn));
+}
+
+/* ── 输入框自适应高度 ─────────────────────────────────────── */
+const qin = document.getElementById('qinput');
+qin.addEventListener('input', () => { qin.style.height = 'auto'; qin.style.height = Math.min(qin.scrollHeight, 130) + 'px'; });
+qin.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+
+/* ── hint chip ───────────────────────────────────────────── */
+function useHint(el) { qin.value = el.textContent.trim(); qin.dispatchEvent(new Event('input')); send(); }
+
+/* ── 发送 ─────────────────────────────────────────────────── */
+async function send() {
+  if (busy) return;
+  const q = qin.value.trim();
+  if (!q) return;
+
+  const myGenId = ++genId;
+  currentController = new AbortController();
+
+  qin.value = ''; qin.style.height = '';
+  document.getElementById('empty').style.display = 'none';
+  busy = true;
+  document.getElementById('send-btn').classList.add('busy');
+  document.getElementById('stop-btn').classList.add('active');
+
+  appendUser(q);
+  const {logEl, ansEl, logArea} = appendAssistant();
+
+  let answerText = '';  // 最终答案，由 event:answer 独立通道送来
+  let finalized  = false;
+
+  // 打字机状态（队列驱动，支持边到边输出）
+  let twQueue   = '';
+  let twRunning = false;
+  let twDoneCb  = null;
+
+  function twInit() {
+    twQueue = ''; twRunning = false; twDoneCb = null;
+    ansEl.innerHTML = '<span class="cursor"></span>';
+  }
+  function twAppend(text) {
+    twQueue += text;
+    if (!twRunning) twRun();
+  }
+  function twRun() {
+    if (twRunning || !twQueue.length) return;
+    twRunning = true;
+    (function tick() {
+      if (myGenId !== genId) { twRunning = false; return; }
+      if (!twQueue.length) {
+        twRunning = false;
+        if (twDoneCb) { const cb = twDoneCb; twDoneCb = null; cb(); }
+        return;
+      }
+      const ch  = twQueue[0]; twQueue = twQueue.slice(1);
+      const cur = ansEl.querySelector('.cursor');
+      if (cur) cur.insertAdjacentHTML('beforebegin', ch === '\n' ? '<br>' : esc(ch));
+      scrollBottom();
+      setTimeout(tick, 18);
+    })();
+  }
+  function twFinish(cb) {
+    if (!twRunning && !twQueue.length) {
+      const cur = ansEl.querySelector('.cursor');
+      if (cur) cur.remove();
+      cb();
+    } else {
+      twDoneCb = () => { const cur = ansEl.querySelector('.cursor'); if (cur) cur.remove(); cb(); };
+    }
+  }
+
+  // 日志流式队列（12ms/行，比答案打字机快）
+  let logQueue   = [];
+  let logRunning = false;
+  let logLnCount = 0;
+
+  function logEnqueue(text, cls) {
+    const spacer = logLnCount > 0 && (
+      text.startsWith('[Tool Used]') ||
+      text.startsWith('[Tool Result]') ||
+      /^\[\d+\] chunk_id=/.test(text)
+    );
+    logQueue.push({ text, cls, spacer });
+    logLnCount++;
+    if (!logRunning) logDrain();
+  }
+  function logDrain() {
+    if (myGenId !== genId) { logRunning = false; return; }
+    if (!logQueue.length) { logRunning = false; return; }
+    logRunning = true;
+    const { text, cls, spacer } = logQueue.shift();
+    if (spacer) appendLogSpacer(logEl);
+    appendLogLine(logEl, text, cls);
+    setTimeout(logDrain, 9);
+  }
+
+  try {
+    const resp = await fetch('/chat', {
+      method:  'POST',
+      headers: {'Content-Type': 'application/json'},
+      body:    JSON.stringify({ query: q, mode, history, cot: cotOn }),
+      signal:  currentController.signal,
+    });
+
+    if (!resp.ok) { appendLogLine(logEl, '⚠ ' + (await resp.text()), 'c-final'); done(); return; }
+
+    // 清除等待点
+    logEl.innerHTML = '';
+    ansEl.innerHTML = '';
+
+    const reader = resp.body.getReader();
+    const dec    = new TextDecoder();
+    let   buf    = '';
+
+    while (true) {
+      const { done: d, value } = await reader.read();
+      if (d) break;
+      buf += dec.decode(value, { stream: true });
+
+      // 解析 SSE 块（\n\n 分隔）
+      const chunks = buf.split('\n\n');
+      buf = chunks.pop();
+
+      for (const chunk of chunks) {
+        let evType = 'message', evData = '';
+        for (const line of chunk.split('\n')) {
+          if (line.startsWith('event: ')) evType = line.slice(7).trim();
+          if (line.startsWith('data: '))  evData = line.slice(6).trim();
+        }
+
+        if (evType === 'done') { finalize(); break; }
+        if (evType === 'answer' && evData) {
+          // 答案走独立通道，不再从日志里猜
+          answerText = JSON.parse(evData).text || '';
+          twInit();
+          twAppend(answerText);
+        } else if (evType === 'log' && evData) {
+          // COT 开才把日志打到日志区，关了就直接忽略
+          if (cotOn) processChunk(JSON.parse(evData).text);
+        }
+      }
+    }
+
+    finalize();
+
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      appendLogLine(logEl, '⚠ 连接失败：' + err.message, 'c-final');
+    }
+    done();
+  }
+
+  // ── 把一块日志 print() 输出逐行打进日志区 ──
+  function processChunk(text) {
+    const lines = text.split('\n');
+    for (const line of lines) {
+      if (!line) continue;
+      logEnqueue(line, classifyLine(line));
+    }
+  }
+
+  function finalize() {
+    if (finalized) return;   // done 事件和流结束可能各调一次，去重
+    finalized = true;
+    history.push({ role: 'user', content: q });
+    history.push({ role: 'assistant', content: answerText });
+    twFinish(done);
+  }
+
+  function done() {
+    busy = false;
+    currentController = null;
+    document.getElementById('send-btn').classList.remove('busy');
+    document.getElementById('stop-btn').classList.remove('active');
+  }
+}
+
+/* ── DOM 操作 ─────────────────────────────────────────────── */
+function appendUser(text) {
+  const msgs = document.getElementById('msgs');
+  const row  = document.createElement('div');
+  row.className = 'msg-row user';
+  row.innerHTML = `<div class="bubble-user">${esc(text)}</div>`;
+  msgs.appendChild(row);
+  forceScroll();
+}
+
+function appendAssistant() {
+  const msgs = document.getElementById('msgs');
+  const row  = document.createElement('div');
+  row.className = 'msg-row assistant';
+  row.innerHTML = `
+    <div class="bubble-ast">
+      <div class="log-area ${cotOn ? 'show' : ''}">
+        <div class="ans-area"><div class="typing-dots"><span></span><span></span><span></span></div></div>
+      </div>
+      <div class="ans-area" style="min-height:42px"></div>
+    </div>`;
+  msgs.appendChild(row);
+  const logArea = row.querySelector('.log-area');
+  const logEl   = logArea.querySelector('.ans-area');
+  const ansEl   = row.querySelectorAll('.ans-area')[1];
+  forceScroll();
+  return { logEl, ansEl, logArea };
+}
+
+function appendLogLine(container, text, cls) {
+  const d = document.createElement('div');
+  d.className = 'log-ln ' + (cls || '');
+  d.textContent = text;
+  container.appendChild(d);
+  scrollBottom();
+}
+
+function appendLogSpacer(container) {
+  const d = document.createElement('div');
+  d.className = 'log-ln';
+  d.innerHTML = '&nbsp;';
+  container.appendChild(d);
+}
+
+function updateAnswer(el, text) {
+  el.innerHTML = esc(text).replace(/\n/g, '<br>') + '<span class="cursor"></span>';
+  scrollBottom();
+}
+
+/* 打字机：用于 COT=off 或最终输出 */
+function typewrite(el, text, speed = 18) {
+  let i = 0;
+  el.innerHTML = '<span class="cursor"></span>';
+  const cur = el.querySelector('.cursor');
+  const timer = setInterval(() => {
+    if (i >= text.length) { clearInterval(timer); cur.remove(); return; }
+    const ch = text[i++];
+    cur.insertAdjacentHTML('beforebegin', ch === '\n' ? '<br>' : esc(ch));
+    scrollBottom();
+  }, speed);
+}
+
+/* ── 辅助函数 ─────────────────────────────────────────────── */
+function classifyLine(t) {
+  if (t.includes('Query Plan') || t.includes('refined_query') || t.startsWith('{') || t.startsWith('}')) return 'c-plan';
+  if (t.includes('[Tool Used]'))   return 'c-tool';
+  if (t.includes('[Tool Result]')) return 'c-result';
+  if (t.includes('[Router]') || t.includes('[Orchestrator]') || t.includes('[Task]') || t.includes('[Resolve]')) return 'c-orch';
+  if (t.includes('[Final Answer]') || t.includes('[Agent Result]')) return 'c-final';
+  return '';
+}
+
+function forceScroll() {
+  const el = document.getElementById('msgs');
+  el.scrollTop = el.scrollHeight;
+}
+
+function scrollBottom() {
+  const el = document.getElementById('msgs');
+  // 只在距底部 80px 以内才自动滚，用户上滚后不强制拽回
+  if (el.scrollHeight - el.scrollTop - el.clientHeight < 80) {
+    el.scrollTop = el.scrollHeight;
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── LLM 配置面板 ─────────────────────────────────────────── */
+let cfgThinking = false;
+
+async function openCfg() {
+  try {
+    const d = await fetch('/llm-config').then(r => r.json());
+    document.getElementById('cfg-model').value = d.has_override ? d.model : '';
+    cfgThinking = d.enable_thinking;
+    document.getElementById('cfg-thinking-sw').classList.toggle('on', cfgThinking);
+    document.getElementById('cfg-badge').classList.toggle('show', d.has_override);
+    document.getElementById('cfg-btn').classList.toggle('active', d.has_override);
+  } catch (_) {}
+  document.getElementById('cfg-overlay').classList.add('open');
+}
+
+function closeCfg() {
+  document.getElementById('cfg-overlay').classList.remove('open');
+}
+
+function closeCfgIfOutside(e) {
+  if (e.target === document.getElementById('cfg-overlay')) closeCfg();
+}
+
+function toggleCfgThinking() {
+  cfgThinking = !cfgThinking;
+  document.getElementById('cfg-thinking-sw').classList.toggle('on', cfgThinking);
+}
+
+async function applyCfg() {
+  const model  = document.getElementById('cfg-model').value.trim();
+  const apikey = document.getElementById('cfg-apikey').value.trim();
+  await fetch('/llm-config', {
+    method:  'POST',
+    headers: {'Content-Type': 'application/json'},
+    body:    JSON.stringify({ model, api_key: apikey, enable_thinking: cfgThinking }),
+  });
+  const hasOv = !!(model || apikey);
+  document.getElementById('cfg-badge').classList.toggle('show', hasOv);
+  document.getElementById('cfg-btn').classList.toggle('active', hasOv);
+  document.getElementById('cfg-apikey').value = '';
+  closeCfg();
+}
+
+async function resetCfg() {
+  await fetch('/llm-config', {
+    method:  'POST',
+    headers: {'Content-Type': 'application/json'},
+    body:    JSON.stringify({ model: '', api_key: '', enable_thinking: null }),
+  });
+  document.getElementById('cfg-model').value  = '';
+  document.getElementById('cfg-apikey').value = '';
+  cfgThinking = false;
+  document.getElementById('cfg-thinking-sw').classList.remove('on');
+  document.getElementById('cfg-badge').classList.remove('show');
+  document.getElementById('cfg-btn').classList.remove('active');
+  closeCfg();
+}
+
+/* ── 停止生成 ─────────────────────────────────────────────── */
+function stopGeneration() {
+  if (!busy) return;
+  genId++;
+  if (currentController) { currentController.abort(); currentController = null; }
+  busy = false;
+  document.getElementById('send-btn').classList.remove('busy');
+  document.getElementById('stop-btn').classList.remove('active');
+}
+
+/* ── 历史面板 ─────────────────────────────────────────────── */
+function toggleHistory() {
+  historyOpen = !historyOpen;
+  document.getElementById('history-panel').classList.toggle('open', historyOpen);
+  document.getElementById('hist-btn').classList.toggle('on', historyOpen);
+  if (historyOpen) renderHistory();
+}
+
+function renderHistory() {
+  const body = document.getElementById('hp-body');
+  if (!history.length) {
+    body.innerHTML = '<div class="hp-empty">暂无历史记录</div>';
+    return;
+  }
+  body.innerHTML = history.map(t => `
+    <div class="hp-turn">
+      <div class="hp-role">${t.role === 'user' ? 'User' : 'Assistant'}</div>
+      <div class="hp-content">${esc(t.content)}</div>
+    </div>
+  `).join('');
+}
+
+function clearHistory() {
+  history = [];
+  renderHistory();
+}
+</script>
+</body>
+</html>
