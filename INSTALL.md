@@ -85,10 +85,10 @@ pip install -r requirements.txt
 两个 BGE 模型共约 6.5GB：
 
 ```bash
-pip install -U "huggingface_hub[cli]"
+python -m pip install -U huggingface_hub
 
-huggingface-cli download BAAI/bge-m3             --local-dir model/BAAI_bge-m3
-huggingface-cli download BAAI/bge-reranker-v2-m3 --local-dir model/BAAI_bge-reranker-v2-m3
+hf download BAAI/bge-m3 --local-dir model/BAAI_bge-m3
+hf download BAAI/bge-reranker-v2-m3 --local-dir model/BAAI_bge-reranker-v2-m3
 ```
 
 ---

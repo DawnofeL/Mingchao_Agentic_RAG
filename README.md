@@ -159,9 +159,9 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu     # 无 GPU
 pip install -r requirements.txt
 
 # 下载模型到 model/
-pip install -U "huggingface_hub[cli]"
-huggingface-cli download BAAI/bge-m3             --local-dir model/BAAI_bge-m3
-huggingface-cli download BAAI/bge-reranker-v2-m3 --local-dir model/BAAI_bge-reranker-v2-m3
+python -m pip install -U huggingface_hub
+hf download BAAI/bge-m3 --local-dir model/BAAI_bge-m3
+hf download BAAI/bge-reranker-v2-m3 --local-dir model/BAAI_bge-reranker-v2-m3
 ```
 
 
@@ -200,6 +200,22 @@ python app.py
 
 > [!NOTE]
 > API key 启动后在网页右上角配置面板填写，安装过程不涉及。
+
+
+
+---
+
+
+
+### API 与模型配置
+
+启动本地网页后，先点击右上角齿轮按钮打开配置面板，在这里填写 API key，并选择要使用的 Qwen 模型。
+
+<img src="img/API_key.png" width="30%" />
+
+配置完成后，就可以在页面底部输入栏里输入问题并发送，系统会以流式输出的方式逐步返回答案。同时右上角可以选择开关 COT 思维链，若关闭则不会打印推理日志，默认为开启状态。
+
+<img src="img/test_conversation.png" width="100%" />
 
 
 
@@ -412,4 +428,3 @@ Mingchao_Agentic_RAG/
 本项目代码基于 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) 协议开源，允许非商业使用与改编，使用时请注明出处。
 
 《明朝那些事儿》语料仅供学习研究使用，原文版权归原著作权人所有。
-
