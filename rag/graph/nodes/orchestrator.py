@@ -48,8 +48,7 @@ class TaskResult:
 
 def _Node_Orchestrator(state: OrchestratorState) -> dict:
     """算出本轮 ready 任务，解引用 / 枚举增生 / 写阻塞结果，产出本轮 jobs。
-
-    与原 while 循环单轮逻辑一一对应。route 字段告诉后面的路由怎么走：
+       route 字段告诉后面的路由怎么走：
         "dispatch"   → 有 job，扇出给 worker 并行执行
         "loop"       → 本轮全阻塞但还有 pending，回到 orchestrator 算下一轮
         "synthesize" → 死锁或全部完成，进入终答合成
@@ -59,15 +58,16 @@ def _Node_Orchestrator(state: OrchestratorState) -> dict:
     pool      = state["pool"]
     refined_q = state["refined_query"]
 
-    # 没有待办任务，直接进合成（对应原 while pending 自然退出，不算死锁）
+    # pending 是空列表，说明所有子任务都已经跑完进了 pool，没活可派了，直接进合成
     if not pending:
         return {"jobs": [], "route": "synthesize"}
 
     round_num = state["round_num"] + 1
 
+    # t["depends_on"] 里每个依赖 id 都已经在 pool 里出现过，这个任务才算 ready
     ready = [t for t in pending if all(dep in pool for dep in t["depends_on"])]
 
-    # 死锁：pending 非空却一个能跑的都挑不出来，直接进合成（与原 break 行为一致）
+    # pending 还有任务，但 ready 是空的，说明剩下的任务全在互相等依赖，谁都跑不了，判定死锁
     if not ready:
         print(f"\n[Orchestrator] 调度死锁，剩余：{[t['task_id'] for t in pending]}")
         return {"round_num": round_num, "jobs": [], "route": "synthesize"}

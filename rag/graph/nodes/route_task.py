@@ -81,6 +81,8 @@ _SYNTHESIZE_ANALYSIS_PROMPT = """\
 """
 
 
+# query_kind 命中哪个 key，就用哪个 prompt；Synthesize_Answer 里 .get() 查不到
+# 任何 key 时才会兜底落到 _SYNTHESIZE_FACT_PROMPT
 _SYNTHESIZE_PROMPTS = {
     "fact":       _SYNTHESIZE_FACT_PROMPT,
     "analysis":   _SYNTHESIZE_ANALYSIS_PROMPT,
@@ -145,7 +147,8 @@ def Synthesize_Answer(
     else:
         human_text = f"问题：{query}\n\n参考段落：\n{context_text}"
 
-    # query_kind 查不到对应 prompt 时，兜底用 fact 这套严格逐句引用的规则
+    # query_kind 命中 _SYNTHESIZE_PROMPTS 里哪个 key，就取对应 value 赋给 prompt；
+    # 一个 key 都没命中才兜底落到 _SYNTHESIZE_FACT_PROMPT
     prompt = _SYNTHESIZE_PROMPTS.get(query_kind, _SYNTHESIZE_FACT_PROMPT)
     messages = [
         SystemMessage(content = prompt),
@@ -205,18 +208,23 @@ def _Run_People(task_text: str, query_kind: str = "fact", top_k: int = 10) -> st
     """
 
     with ThreadPoolExecutor(max_workers = 1) as executor:
+
+        # executor.submit 不阻塞，chunk 检索丢到副线程后台跑，主线程接着往下执行
         chunk_thread = executor.submit(Search_Chunks, task_text, top_k)
 
+        # 这一行会阻塞，跟副线程的 chunk 检索是同时在跑的
         people_answer = Route_People_Node(task_text)
 
         # 完整答案，不需要 chunk
         if people_answer is not None and not people_answer.startswith(_PEOPLE_SUPPLEMENT):
             return people_answer
 
+        # .result() 阻塞等副线程跑完，取出 chunk 检索结果
         chunks = chunk_thread.result()
         print()
         _Print_Chunk_Summary(chunks, header = "Chunk · 兜底")
 
+        # 前缀切掉，剩下的就是已确认的 partial 内容
         structured = None
         if people_answer is not None and people_answer.startswith(_PEOPLE_SUPPLEMENT):
             structured = people_answer[len(_PEOPLE_SUPPLEMENT):]
@@ -237,18 +245,23 @@ def _Run_Timeline(task_text: str, query_kind: str = "fact", top_k: int = 10) -> 
     """
 
     with ThreadPoolExecutor(max_workers = 1) as executor:
+
+        # executor.submit 不阻塞，chunk 检索丢到副线程后台跑，主线程接着往下执行
         chunk_thread = executor.submit(Search_Chunks, task_text, top_k)
 
+        # 这一行会阻塞，跟副线程的 chunk 检索是同时在跑的
         timeline_answer = Route_Timeline_Node(task_text)
 
         # 完整答案，不需要 chunk
         if timeline_answer is not None and not timeline_answer.startswith(_TIMELINE_SUPPLEMENT):
             return timeline_answer
 
+        # .result() 阻塞等副线程跑完，取出 chunk 检索结果
         chunks = chunk_thread.result()
         print()
         _Print_Chunk_Summary(chunks, header = "Chunk · 兜底")
 
+        # 前缀切掉，剩下的就是已确认的 partial 内容
         structured = None
         if timeline_answer is not None and timeline_answer.startswith(_TIMELINE_SUPPLEMENT):
             structured = timeline_answer[len(_TIMELINE_SUPPLEMENT):]
@@ -271,9 +284,12 @@ def _Run_Direct(task_text: str, history: list) -> str:
         history:   多轮对话历史列表，每条含 role ("user" | "assistant") / content。
     """
 
+    # messages 先放系统提示词，后面每轮历史对话都往这个列表追加
     messages = [SystemMessage(content = _DIRECT_PROMPT)]
 
-    # 把历史对话还原成 LLM message 序列
+    # turn 是 history 里的一条 {"role": ..., "content": ...} 字典，
+    # role 是 user 就包成 HumanMessage，是 assistant 就包成 AIMessage，
+    # 两种角色对应 langchain_core 不同的消息类型，模型才分得清谁说的话
     for turn in history:
         role    = turn.get("role")
         content = turn.get("content", "")
@@ -282,10 +298,12 @@ def _Run_Direct(task_text: str, history: list) -> str:
         elif role == "assistant":
             messages.append(AIMessage(content = content))
 
+    # 历史对话拼完后，最后把这次用户的新问题也追加进去
     messages.append(HumanMessage(content = task_text))
 
     response = get_llm().invoke(messages)
 
+    # response.content 为空字符串或 None 时统一换成固定提示，不让空答案漏出去
     answer = response.content.strip() if response.content else ""
     if not answer:
         answer = "（LLM 返回了空响应，无法给出结论）"
