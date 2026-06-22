@@ -58,13 +58,11 @@
 - [ii. 顺序依赖（解引用与枚举增生）](#ii-顺序依赖解引用与枚举增生)
 
 **[8. Harness Engineering 设计](#8-harness-engineering-设计)**
-- [i. 我理解的 Harness Engineering](#i-我理解的-harness-engineering)
-- [ii. 意图识别节点：JSON 格式校验与重试](#ii-意图识别节点json-格式校验与重试)
-- [iii. 知识图谱检索工具：参数枚举校验](#iii-知识图谱检索工具参数枚举校验)
-- [iv. 引用锚点的运行时校验](#iv-引用锚点的运行时校验)
-- [v. native tool call 未触发时的文本降级解析](#v-native-tool-call-未触发时的文本降级解析)
-- [vi. 为什么手写工具执行，不用 ToolNode](#vi-为什么手写工具执行不用-toolnode)
-- [vii. 没做到的部分](#vii-没做到的部分)
+- [i. 意图识别节点：JSON 格式校验与重试](#i-意图识别节点json-格式校验与重试)
+- [ii. 知识图谱检索工具：参数枚举校验](#ii-知识图谱检索工具参数枚举校验)
+- [iii. 引用锚点的运行时校验](#iii-引用锚点的运行时校验)
+- [iv. native tool call 未触发时的文本降级解析](#iv-native-tool-call-未触发时的文本降级解析)
+- [v. 为什么手写工具执行，不用 ToolNode](#v-为什么手写工具执行不用-toolnode)
 
 **[9. RAG 测评体系](#9-rag-测评体系)**
 - [i. 出题设计](#i-出题设计)
