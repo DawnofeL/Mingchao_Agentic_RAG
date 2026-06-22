@@ -1,9 +1,9 @@
 """单任务分支执行器。
 
 本模块提供 people / timeline / direct 三个单任务分支的执行入口，供顶层图
-（build.py）的分支节点调用，以及供 orchestrator 的 worker 调用。两层路由本身
-已上移到 build.py 的 agentic_graph，本模块不再负责路由，只负责执行。
-    Synthesize_Answer   — 接收 query + chunks（+ 可选 structured_context），调 LLM 综合回答。
+（build.py）的分支节点调用，以及供 orchestrator 的 worker 调用。
+    Synthesize_Answer   — 接收 query + chunks + 可选 structured_context，调 LLM 综合回答；
+                          structured_context 就是下面 partial 换了个参数名传进来。
     _Run_People         — people 双路并行节点：副线程始终跑 chunk 检索；
                           主线程并行跑 Route_People_Node：
                             完整答案 → 直接返回；
@@ -116,15 +116,18 @@ def Synthesize_Answer(
         query:              用户原始问题。
         chunks:             Search_Chunks 返回的 chunk 列表，每条含 chunk_id / content 字段。
         query_kind:         QU 输出的查询类型，"fact" / "analysis" / "multi_enum"。
-        structured_context: people / timeline 路由提取的 partial answer（带 id 引用），
+        structured_context: 即 _Run_People / _Run_Timeline 里的 partial 变量（带 id 引用），
+                            换了个参数名传进来，本质是同一份内容。
                             与 chunk 段落合并后一起送给 LLM 综合。为 None 时只用 chunk。
     Returns:
         LLM 综合后的答案字符串。无任何内容时直接返回"找不到"提示。
     """
 
+    # 两个来源都没内容，没东西可综合，直接拒答
     if not chunks and not structured_context:
         return "根据现有资料，无法回答此问题。"
 
+    # structured_context 在前，chunk 段落在后，按顺序拼成一份完整上下文文本
     context_parts = []
     if structured_context:
         context_parts.append(f"【结构化数据已确认部分（带 id 引用，可直接引用）】\n{structured_context}")
@@ -133,6 +136,7 @@ def Synthesize_Answer(
         context_parts.append(f"[chunk_id={cid}]\n{chunk.get('content', '')}")
     context_text = "\n\n".join(context_parts)
 
+    # 有 structured_context 时提示词里要点名【结构化数据】也是有效来源，否则只提原文段落
     if structured_context:
         human_text = (
             f"问题：{query}\n\n"
@@ -141,12 +145,14 @@ def Synthesize_Answer(
     else:
         human_text = f"问题：{query}\n\n参考段落：\n{context_text}"
 
+    # query_kind 查不到对应 prompt 时，兜底用 fact 这套严格逐句引用的规则
     prompt = _SYNTHESIZE_PROMPTS.get(query_kind, _SYNTHESIZE_FACT_PROMPT)
     messages = [
         SystemMessage(content = prompt),
         HumanMessage(content  = human_text),
     ]
 
+    # openai.BadRequestError 是内容审核拦截抛出的异常，接住后直接返回固定提示，不让它往上炸
     try:
         response = get_llm().invoke(messages)
     except openai.BadRequestError as e:
@@ -157,6 +163,7 @@ def Synthesize_Answer(
     if not answer:
         return "（LLM 返回了空响应，无法给出结论）"
 
+    # 只收 chunks 里真实存在的 chunk_id 当合法集合，跟答案里引用的 id 比对
     valid_chunk_ids = {c["chunk_id"] for c in chunks if isinstance(c.get("chunk_id"), int)}
     error = Validate_Citations(answer, "chunk_id", valid_chunk_ids)
     if error is not None:

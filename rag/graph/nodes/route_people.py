@@ -295,30 +295,47 @@ def _Node_First_Call(state: RetrievalState) -> dict:
 
 
 def _Node_Execute_Tool(state: RetrievalState) -> dict:
-    """执行第一次选定的工具，累计合法 id，把结果回填进 messages。"""
+    """
+    执行 first_call 选定的工具，把结果回填进 messages，供 judge 节点使用。
 
+    从 state["pending_tool"] 取出工具名和参数真正执行一次，
+    执行结果包成 ToolMessage 追加进 messages，tool_call_id 对应那条 tool_call，
+    再把结果里能收集到的 people_id 并入 valid_ids，tool_round 记为 1，
+    标记已经走完第一轮工具调用。
+    """
+
+    # pending_tool 是 first_call 存进来的那条 tool_call，name/args 真正拿去执行
     call   = state["pending_tool"]
     result = _Execute_Tool(call["name"], call["args"])
 
+    # 打印日志
     _Log_Tool_Used(call["name"], call["args"])
     _Log_Tool_Result(result)
 
-    # ToolMessage 的 tool_call_id 要跟 LLM 那条 tool_call 的 id 对上，
-    # 模型才知道这条结果对应它发出的哪次调用
+    # ToolMessage 专门将工具执行结果塞回对话历
     messages = state["messages"] + [
         ToolMessage(content = _Clip(result), tool_call_id = call["id"])
     ]
     return {
         "messages":   messages,
+
+        # | 是集合并集，把这次工具结果里收集到的合法 id 累加进已有的 valid_ids
         "valid_ids":  state["valid_ids"] | _Ids_From_Result(call["name"], result),
         "tool_round": 1,
     }
 
 
 def _Node_Judge(state: RetrievalState) -> dict:
-    """第二次 LLM 调用：绑定另一个工具 + check_chunk，判断够不够回答。
+    """第二次 LLM 调用，先把第一次用过的工具排除掉，拼一条 retry_prompt 追加进
+    messages，绑定剩下的工具 + check_chunk 问模型这次工具结果够不够回答。
 
-    三种走向写进 result_kind：answer 直接收尾，check 转 make_partial，retry 换工具再查。
+    judgment 是这次调用拿到的结果，根据它的 tool_calls 分三种情况处理：
+    ① tool_calls 是空的，模型直接给文本结论，过 _Guard_Citations 校验引用后
+       result_kind 记为 "answer"，子图到这里直接结束。
+    ② tool_calls 里有 check_chunk，result_kind 记为 "check"，返回的 messages
+       不拼 judgment，留给 make_partial 节点接着处理。
+    ③ 剩下的情况说明模型选了另一个工具，取 tool_calls[0] 存进 pending_tool，
+       result_kind 记为 "retry"，交给 execute_retry 节点真正执行。
     """
 
     # 已经调过的那个工具不能再调，只把剩下的工具 + check_chunk 绑给这一轮
@@ -333,7 +350,10 @@ def _Node_Judge(state: RetrievalState) -> dict:
         f"严禁再次调用 {first_name}。"
     )
 
+    # 历史 messages 拼上这条新的 retry_prompt 送给 LLM；
     messages = state["messages"] + [HumanMessage(content = retry_prompt)]
+
+    # 绑定的工具列表是 other_tools 拼上 check_chunk，凑成这一轮能选的全部工具
     judgment = get_llm().bind_tools(other_tools + [CHECK_CHUNK_TOOL]).invoke(messages)
 
     # 没触发任何工具调用，说明模型直接给出文本结论，本节点就此收尾
@@ -342,11 +362,11 @@ def _Node_Judge(state: RetrievalState) -> dict:
         _Log_Agent_Result(text)
         return {"messages": messages, "result_kind": "answer", "answer": text}
 
-    # check_chunk 路径不把 judgment 入栈，让 make_partial 拿到与原实现一致的 messages
+    # 返回的 messages 没拼上 judgment，这次 check_chunk 调用不会留进对话历史
     if any(tc["name"] == "check_chunk" for tc in judgment.tool_calls):
         return {"messages": messages, "result_kind": "check"}
 
-    # 走到这里说明模型选了 other_tools 里的另一个工具，记下来等下一节点执行
+    # 只取第一条 tool_call，存进 pending_tool 交给 execute_retry 节点真正执行
     call = judgment.tool_calls[0]
     return {
         "messages":     messages + [judgment],
@@ -356,41 +376,70 @@ def _Node_Judge(state: RetrievalState) -> dict:
 
 
 def _Node_Execute_Retry(state: RetrievalState) -> dict:
-    """执行换用的第二个工具，累计合法 id，结果回填 messages。"""
+    """执行 judge 节点换用的第二个工具，把结果回填进 messages，供 final_judge 使用。
 
+    跟 _Node_Execute_Tool 是同一套逻辑，只是这是第二轮检索：
+    从 pending_tool 取出换用的工具名和参数执行，结果包成 ToolMessage 追加进 messages，
+    合法 id 并入 valid_ids，tool_round 改记为 2，表示两个工具都已经用过。
+    """
+
+    # pending_tool 是 judge 节点换用的那条 tool_call，name/args 真正拿去执行
     call   = state["pending_tool"]
     result = _Execute_Tool(call["name"], call["args"])
 
+    # 打印日志
     print("\n[Retry Tool]")
     _Log_Tool_Used(call["name"], call["args"])
     _Log_Tool_Result(result)
 
+    # ToolMessage 是 langchain_core 的消息类型，专门装工具执行结果塞回对话历史；
+    # tool_call_id 填 call["id"]，跟 LLM 那条 tool_call 对上号
     messages = state["messages"] + [
         ToolMessage(content = _Clip(result), tool_call_id = call["id"])
     ]
     return {
         "messages":   messages,
+
+        # | 是集合并集，把这次工具结果里收集到的合法 id 累加进已有的 valid_ids
         "valid_ids":  state["valid_ids"] | _Ids_From_Result(call["name"], result),
         "tool_round": 2,
     }
 
 
 def _Node_Final_Judge(state: RetrievalState) -> dict:
-    """第三次 LLM 调用：只绑定 check_chunk 做最终判断。"""
+    """第三次 LLM 调用，两个工具都已用完，只绑定 check_chunk 做最终判断。
+
+    走到这里只有两种结局：
+    ① 触发了 check_chunk，说明两轮工具结果都不够回答，result_kind 记为 "check"，
+       交给 make_partial 节点提取已确认部分做兜底。
+    ② 没触发 check_chunk，模型直接给出文本结论，答案过 _Guard_Citations 校验后
+       result_kind 记为 "answer"，子图到这里直接结束。
+    """
 
     # 两次工具都用完了，这一轮只绑 check_chunk，模型要么直接作答要么触发兜底
     final = get_llm().bind_tools([CHECK_CHUNK_TOOL]).invoke(state["messages"])
 
+    # tool_calls 非空且其中有 check_chunk，才算触发兜底，否则当作模型直接作答
     if final.tool_calls and any(tc["name"] == "check_chunk" for tc in final.tool_calls):
         return {"result_kind": "check"}
 
+    # 没触发 check_chunk，final.content 就是模型的文本结论，过一遍引用校验再返回
     text = _Guard_Citations(final.content, state["valid_ids"], "第三次最终判断")
     _Log_Agent_Result(text)
     return {"result_kind": "answer", "answer": text}
 
 
 def _Node_Make_Partial(state: RetrievalState) -> dict:
-    """check_chunk 触发后提取 partial，决定走 supplement 合并还是纯 chunk 兜底。"""
+    """check_chunk 触发后提取已确认部分，决定走 supplement 合并还是纯 chunk 兜底。
+
+    走到这里有三种结局：
+    ① partial 有内容且不是"无"，但校验引用没通过，result_kind 直接记为 "answer"，
+       answer 存固定拒答文案。
+    ② partial 有内容、不是"无"且校验通过，result_kind 记为 "supplement"，
+       answer 存 partial 内容，交给上游跟纯 chunk 检索结果合并回答。
+    ③ partial 为空或是"无"，说明工具完全没查到能确认的内容，result_kind 记为
+       "fallback"，由上游纯 chunk 兜底检索接手。
+    """
 
     # tool_round 是 1 还是 2，只影响日志文案，不影响判断逻辑本身
     first_round = state["tool_round"] == 1
@@ -451,7 +500,7 @@ def _Build_People_Graph():
     builder.add_edge(START, "first_call")
     builder.add_conditional_edges(
         "first_call", _Route_After_First,
-        {"execute": "execute_tool", "end": END},
+        {"execute": "execute_tool", "end": END},  # 根据函数输出的二院结果进行对应边的路由
     )
     builder.add_edge("execute_tool", "judge")
     builder.add_conditional_edges(
@@ -473,17 +522,20 @@ _people_graph = _Build_People_Graph()
 
 
 def Route_People_Node(task_text: str) -> str | None:
-    """People 路由子图入口，保持原有返回契约不变。
+    """People 路由子图的外部入口，上游 route_task._Run_People 直接调用这个函数。
 
-    构造初始状态后调用编译好的子图，把终态 result_kind 映射回原契约：
-        "answer"     → 文本答案字符串（含直接作答、最终判断、引用拒答）。
-        "supplement" → "__SUPPLEMENT__" + partial，上游合并 chunk 一起回答。
-        "fallback"   → None，由上游纯 chunk 兜底。
+    先把 task_text 包成 _people_graph.invoke() 要求的初始状态字典 init，
+    跑完整张子图后拿到 final_state，里面的 result_kind 和 answer 是子图内部
+    自己定义的概念，外部调用者看不懂，所以在这里翻译成三种返回值：
+        result_kind == "answer"     → 直接返回 answer 这个文本答案字符串。
+        result_kind == "supplement" → 返回 "__SUPPLEMENT__" + answer，
+                                       提示上游要跟纯 chunk 检索结果合并。
+        result_kind == "fallback"   → 返回 None，交给上游纯 chunk 兜底。
 
     Args:
         task_text: 当前 task 的问题文本。
     Returns:
-        str / "__SUPPLEMENT__"+partial / None，三种含义同上。
+        answer / "__SUPPLEMENT__" + answer / None，三种含义同上。
     """
 
     init: RetrievalState = {
