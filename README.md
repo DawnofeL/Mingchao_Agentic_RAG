@@ -48,7 +48,7 @@
 
 - **意图识别与问题分类**：Query Understanding Node 将问题归入六大类型（实体关系、时序事件、场景描述、因果分析、子任务拆分、闲聊感叹），决定后续路由走向。
 
-- **复合提问的子任务拆解与编排**：复合问题（例如 “请说出明朝权势滔天的太监以及各自的结局如何” ）拆解为带 `depends_on` 依赖关系的子任务列表，由 Python 拓扑调度器按轮次执行。无依赖任务并行发出；有依赖任务等上游答案入池后，由 LLM 做指代还原与枚举展开，将单个子任务裂变为 N 条具体查询并发执行，结果统一聚合至父任务证据池。
+- **复合提问的子任务拆解与编排**：复合问题（例如 “请说出明朝权势滔天的太监以及各自的结局如何” ）拆解为带 `depends_on` 依赖关系的子任务列表，由 LangGraph 编排子图（orchestrator-worker 循环）按依赖轮次调度执行。无依赖任务用 `Send` 一次性扇出并行发出；有依赖任务等上游答案入池后，由 LLM 做指代还原与枚举展开，将单个子任务裂变为 N 条具体查询并发执行，结果统一聚合至父任务证据池。
 
 - **工具调用与向量库查询兜底**：人物和时间线路由各有专用检索工具，LLM 通过 native tool call 选择并填写参数。工具结果不足时调用 `check_chunk` 信号触发兜底，并行运行的 chunk 副线程此时已就绪，无额外等待。
 
@@ -264,12 +264,12 @@ Mingchao_Agentic_RAG/
 │   ├── 📂 eval_qna/                                          # 评测题库
 │   │   ├── 📂 chunk_search/                                  # 向量检索题库
 │   │   │   └── 📃 chunk_eval_140.json                        # 140 道 chunk 检索评测题
-│   │   ├── ▸📂 hallu_test/                                    # 幻觉测试
-│   │   ├── ▸📂 people/                                        # 人物题库测试
-│   │   ├── ▸📂 timeline/                                      # 事件时间线题库测试
-│   │   └── ▸📂 vector_mode/                                   # 纯chunk召回题库（因果分析，描述类）
-│   ├── ▸📂 mingchao_json/                                     # 7 卷明朝那些事儿原文 JSON
-│   ├── ▸📂 mingchao_pdf/                                      # 7 卷分册 PDF + 合并版 PDF
+│   │   ├── ▸📂 hallu_test/                                   # 幻觉测试
+│   │   ├── ▸📂 people/                                       # 人物题库测试
+│   │   ├── ▸📂 timeline/                                     # 事件时间线题库测试
+│   │   └── ▸📂 vector_mode/                                  # 纯chunk召回题库（因果分析，描述类）
+│   ├── ▸📂 mingchao_json/                                    # 7 卷明朝那些事儿原文 JSON
+│   ├── ▸📂 mingchao_pdf/                                     # 7 卷分册 PDF + 合并版 PDF
 │   ├── 📂 people_timeline/                                   # 人物与时间线结构化知识图谱
 │   │   ├── 📃 mingchao_people.json                           # 人物关系图谱数据
 │   │   └── 📃 mingchao_timeline.json                         # 时间线事件图谱数据
@@ -279,8 +279,8 @@ Mingchao_Agentic_RAG/
 │   ├── 📃 Ming_Dynasty.json                                  # Milvus Collection schema
 │   └── 📃 milvus_lite.db                                     # Milvus Lite 本地向量库
 ├── 📂 model/                                                 # 本地模型权重（首次运行自动下载）
-│   ├── ▸📂 BAAI_bge-m3/                                       # BGE-M3 encoder，dense + sparse
-│   └── ▸📂 BAAI_bge-reranker-v2-m3/                           # BGE reranker，RRF 候选精排
+│   ├── ▸📂 BAAI_bge-m3/                                      # BGE-M3 encoder，dense + sparse
+│   └── ▸📂 BAAI_bge-reranker-v2-m3/                          # BGE reranker，RRF 候选精排
 ├── 📂 eval/                                                  # 评测模块
 │   ├── 📂 agentic_eval/                                      # agentic rag 结果生成
 │   │   └── 📃 agentic_results.py                             # 批量生成 TestResults JSON
@@ -306,8 +306,8 @@ Mingchao_Agentic_RAG/
 │           └── 📃 styles.py                                  # 报告样式
 ├── 📂 output/                                                # 各类评测与可视化输出
 │   ├── 📂 embedding_viusal/                                  # 向量分布可视化
-│   │   ├── 📃 明朝那些事儿_dense_visual.html                   # dense 向量分布
-│   │   └── 📃 明朝那些事儿_sparse_visual.html                  # sparse 向量分布
+│   │   ├── 📃 明朝那些事儿_dense_visual.html                  # dense 向量分布
+│   │   └── 📃 明朝那些事儿_sparse_visual.html                 # sparse 向量分布
 │   ├── 📃 flowchart.html                                     # 交互式架构流程图
 │   ├── 📂 llm_evaluation/                                    # LLM 评分 HTML 报告
 │   │   ├── 📃 eval_100_Eval_agentic.html                     # 综合 100 题 agentic 报告
@@ -316,9 +316,9 @@ Mingchao_Agentic_RAG/
 │   │   ├── 📃 people_eval_50_Eval_vector.html                # 人物 vector 报告
 │   │   ├── 📃 timeline_eval_50_Eval_agentic.html             # 时间线 agentic 报告
 │   │   └── 📃 timeline_eval_50_Eval_vector.html              # 时间线 vector 报告
-│   ├── ▸📂 mingchao_people_graph/                             # 人物关系图谱可视化
-│   ├── ▸📂 mingchao_timeline/                                 # 时间线图谱可视化
-│   └── ▸📂 rag_evaluation/                                    # 向量检索指标（Recall / NDCG）报告
+│   ├── ▸📂 mingchao_people_graph/                            # 人物关系图谱可视化
+│   ├── ▸📂 mingchao_timeline/                                # 时间线图谱可视化
+│   └── ▸📂 rag_evaluation/                                   # 向量检索指标（Recall / NDCG）报告
 ├── 📂 tools/                                                 # 离线数据预处理工具包
 │   ├── 📂 pdf_slice/                                         # PDF 解析与分块
 │   │   ├── 📃 langchain_recursive_slice.py                   # 二级递归切分（句子级 overlap）
@@ -330,36 +330,37 @@ Mingchao_Agentic_RAG/
 │       └── 📃 milvus.py                                      # 自动建库建表 + 批量插入
 ├── 📂 rag/                                                   # 可 import 的运行时代码
 │   ├── 📂 agent/                                             # 运行模式入口 + LLM skill 提示词
-│   │   ├── 📃 rag.py                                         # Agentic_RAG() 分发入口
+│   │   ├── 🟢 📃 rag.py                                      # Agentic_RAG() 分发入口
 │   │   ├── 📂 modes/                                         # 模式级编排层
-│   │   │   ├── 📃 agentic_mode.py                            # agentic 模式编排
-│   │   │   └── 📃 vector_mode.py                             # vector 模式编排
+│   │   │   ├── 🟢 📃 agentic_mode.py                         # agentic 模式编排
+│   │   │   └── 🟢 📃 vector_mode.py                          # vector 模式编排
 │   │   └── 📂 skills/                                        # 各节点 system prompt
-│   │       ├── 📃 final_answer.md                            # 终答合成提示词
-│   │       ├── 📃 people_plan.md                             # 人物相关工具使用提示词
-│   │       ├── 📃 query_understanding.md                     # 意图识别提示词
-│   │       ├── 📃 resolve_references.md                      # 指代还原 / 枚举展开提示词
-│   │       └── 📃 timeline_plan.md                           # 时间线相关工具使用提示词
+│   │       ├── 🟢 📃 final_answer.md                         # 终答合成提示词
+│   │       ├── 🟢 📃 people_plan.md                          # 人物相关工具使用提示词
+│   │       ├── 🟢 📃 query_understanding.md                  # 意图识别提示词
+│   │       ├── 🟢 📃 resolve_references.md                   # 指代还原 / 枚举展开提示词
+│   │       └── 🟢 📃 timeline_plan.md                        # 时间线相关工具使用提示词
 │   ├── 📂 config/                                            # 全局配置
-│   │   └── 📃 settings.py                                    # 含 MILVUS_MODE，API key 等配置
+│   │   └── 🟢 📃 settings.py                                 # 含 MILVUS_MODE，API key 等配置
 │   ├── 📂 graph/                                             # LangGraph 图组装、状态定义等
-│   │   ├── 📂 nodes/                                         # 图节点
-│   │   │   ├── 📃 orchestrator.py                            # 多任务编排调度器
-│   │   │   ├── 📃 query_understanding.py                     # 意图识别节点
-│   │   │   ├── 📃 route_people.py                            # 人物路由节点
-│   │   │   ├── 📃 route_task.py                              # 任务分发节点
-│   │   │   └── 📃 route_timeline.py                          # 时间线路由节点
-│   │   ├── 📃 build.py                                       # StateGraph 组装
-│   │   ├── 📃 state.py                                       # 状态定义
-│   │   └── 📃 stream.py                                      # 流式输出格式化
+│   │   ├── 📂 nodes/                                         # 图节点与子图
+│   │   │   ├── 🟢 📃 orchestrator.py                         # 多任务编排子图
+│   │   │   ├── 🟢 📃 query_understanding.py                  # 意图识别节点
+│   │   │   ├── 🟢 📃 route_people.py                         # 人物检索子图
+│   │   │   ├── 🟢 📃 route_task.py                           # 单任务分支执行器
+│   │   │   └── 🟢 📃 route_timeline.py                       # 时间线检索子图
+│   │   ├── 🟢 📃 build.py                                    # Vector / Agentic 两张图组装
+│   │   ├── 🟢 📃 citation_check.py                           # 引用锚点跨证据池校验（防幻觉）
+│   │   ├── 🟢 📃 state.py                                    # 状态定义
+│   │   └── 🟢 📃 stream.py                                   # 输出格式化 + Agentic 流式转发
 │   └── 📂 retrieval/                                         # Vector 与 Agentic 代码检索组件
 │       ├── 📂 tools/                                         # LLM 可调用的结构化检索工具
-│       │   ├── 📃 people_tools.py                            # 人物检索工具 + check_chunk
-│       │   └── 📃 timeline_tools.py                          # 时间线检索工具
-│       ├── 📃 chunk_rrf.py                                   # dense + sparse + RRF + reranker
+│       │   ├── 🟢 📃 people_tools.py                         # 人物检索工具 + check_chunk
+│       │   └── 🟢 📃 timeline_tools.py                       # 时间线检索工具
+│       ├── 🟢 📃 chunk_rrf.py                                # dense + sparse + RRF + reranker
 │       ├── 📃 milvus_lite_setup.py                           # Milvus Lite 首次建表 + 导入
-│       ├── 📃 people_store.py                                # 人物图谱加载与过滤
-│       └── 📃 timeline_store.py                              # 时间线图谱加载与过滤
+│       ├── 🟢 📃 people_store.py                             # 人物图谱加载与过滤
+│       └── 🟢 📃 timeline_store.py                           # 时间线图谱加载与过滤
 ├── 📂 server/                                                # FastAPI 后端
 │   ├── 📃 app.py
 │   └── 📃 schemas.py                                         # Pydantic 请求 / 响应模型
@@ -412,8 +413,8 @@ Mingchao_Agentic_RAG/
 ├── 📃 app.py                                                 # 一键启动入口：python app.py
 ├── 📃 requirements.txt
 ├── 📃 LICENSE
-├── 📃 Project_Guide.md                                 # 项目速览文档（含全部设计思路与踩坑总结）
-├── ▸📂 img/                                                   # 文档配图
+├── 📃 Project_Guide.md                               		  # 项目速览文档（含全部设计思路与踩坑总结）
+├── ▸📂 img/                                                  # 文档配图
 └── 📃 README.md
 ```
 

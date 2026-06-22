@@ -2,7 +2,7 @@
 
 本模块负责从 mingchao_people.json 加载人物数据，并提供两个检索函数：
     People_Search        — 三层过滤（era_filter → primary_filter → entities）依次收窄，返回人物档案。
-    Relationships_Search — 按主体人名定位，再按 target / type_filter 过滤关系条目，返回关系图。
+    Relationships_Search — 按主体人名定位，再按 target 过滤关系条目，返回关系图。
 
 两个函数供 people_tools.py 包装成 LangChain @tool，外部不直接调用本模块。
 """
@@ -94,6 +94,9 @@ def _Load_Store() -> list[dict]:
 def _Regex_Match_Field(field_value: str | list, pattern: str) -> bool:
     """对字符串或字符串列表字段做正则子串匹配，任一命中返回 True。
 
+    用的是 re.search，不要求从头匹配、也不要求整串匹配上，只要 pattern 在
+    字符串里任意位置出现过一次就算命中，并且大小写不敏感。
+
     Args:
         field_value: 目标字段值，可以是字符串或字符串列表。
         pattern: 正则表达式字符串。
@@ -114,8 +117,16 @@ def People_Search(
 ) -> list[dict]:
     """三参数 AND 收窄检索人物档案。
 
-    参数间 AND（era → primary_filter → entities 依次收窄），参数内 list 是 OR。
+    三个参数之间是 AND，依次收窄候选池（era_filter → primary_filter → entities）；
+    每个参数自己内部如果是一组词，则是 OR，命中其中任意一个就算通过这一轮。
+    entities 这一轮里，一个候选只要它的 name/aliases/roles/secondary_identity
+    四个字段里，任意一个字段命中 entities 列表里任意一个词，就算通过。
     设计原则：宁可多返回，让 LLM 做阅读理解，而不是靠参数精筛导致漏召回。
+
+    示例：entities=["朱元璋", "徐达"], era_filter=["洪武"], primary_filter="皇帝"。
+    先留下 era 字段命中"洪武"的人物，再留下 primary_identity 正好是"皇帝"的，
+    最后留下 name/aliases/roles/secondary_identity 任一字段命中"朱元璋"或"徐达"的，
+    三轮过完，徐达因为不是"皇帝"会在第二轮被滤掉，朱元璋会留下来。
 
     Args:
         entities: 可能出现在 name/aliases/roles 字段的词语列表，无锚点时传空列表。
@@ -138,10 +149,12 @@ def People_Search(
             if any(_Regex_Match_Field(p.get("era", ""), era) for era in era_filter)
         ]
 
-    # 第二轮：primary_filter AND entities，依次收窄
+    # primary_identity 精确等于 primary_filter 才算命中
     def _primary_hit(p: dict) -> bool:
         return p.get("primary_identity", "") == primary_filter
 
+    # entities 里任意一个词，在 name/aliases/roles/secondary_identity
+    # 任意一个字段命中，就算这个候选通过
     def _entities_hit(p: dict) -> bool:
         return any(
             _Regex_Match_Field(p.get("name", ""), kw)
@@ -151,8 +164,11 @@ def People_Search(
             for kw in entities
         )
 
+    # 第二轮：用 primary_filter 收窄
     if primary_filter:
         candidates = [p for p in candidates if _primary_hit(p)]
+
+    # 第三轮：用 entities 继续收窄
     if entities:
         candidates = [p for p in candidates if _entities_hit(p)]
 
@@ -168,11 +184,16 @@ def Relationships_Search(
 ) -> dict:
     """检索主体人物的关系图谱。
 
-    先在 name 和 aliases 字段定位主体人物，再按 target 过滤 relationships 列表。
-    target 为 None 时返回全量关系，让 LLM 做阅读理解。
+    先在 name 和 aliases 字段定位主体人物（OR 匹配，取第一个命中），再用 target
+    过滤该主体的 relationships 列表，只看 relationships[].target 这个字段
+    （对方是谁），不看关系类型。target 为 None 时返回全量关系。
+
+    示例：person="朱元璋", target="马皇后"，假设朱元璋的 relationships 里有
+    [{"target": "马皇后", "relation": "皇后"}, {"target": "朱标", "relation": "长子"}]，
+    过滤后只剩 target 匹配"马皇后"的那一条，"朱标"这条会被丢掉。
 
     Args:
-        person: 主体人名或别名，必填，在 name 和 aliases 字段做正则匹配。
+        person: 主体人名或别名，必填，在 name 和 aliases 字段做正则匹配，取第一个命中的记录。
         target: 关系目标人名，只保留 relationships[].target 匹配的条目，为 None 时不过滤。
     Returns:
         包含 name / era / relationships 的字典，relationships 是过滤后的关系列表。
@@ -181,7 +202,7 @@ def Relationships_Search(
 
     store = _Load_Store()
 
-    # 在 name 和 aliases 字段定位主体人物，取第一个命中的记录
+    # 定位主体：逐条记录检查 person 是否匹配 name 或 aliases，取第一个命中的
     matched = None
     for p in store:
         name_hit = _Regex_Match_Field(p.get("name", ""), person)
@@ -194,7 +215,7 @@ def Relationships_Search(
     if matched is None:
         return {}
 
-    # 取出关系列表，target 过滤：只保留 relationships[].target 匹配的条目
+    # 过滤关系：只留 target 字段（关系对象是谁）匹配的条目，关系类型不参与过滤
     relationships = matched.get("relationships", [])
 
     if target is not None:

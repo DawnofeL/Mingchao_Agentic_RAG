@@ -1,28 +1,28 @@
-"""Timeline 路由节点。
+"""Timeline 路由子图。
 
-本模块实现 timeline 路由节点，负责以下步骤：
-    1. 读取 timeline_plan.md 作为 system prompt。
-    2. 将 TIMELINE_TOOLS 注册给 LLM，发起 native tool call。
-    3. 打印 [Tool Used] 工具名和参数 JSON。
-    4. 执行 LLM 选定的工具，打印 [Tool Result]（日志截断 300 字，LLM 拿最多 ~30000 token）。
-    5. 第二次 LLM 调用前注入二选一指令，绑定 check_chunk 信号工具做最终判断：
-       - LLM 输出文本 → 返回文本答案。
-       - LLM 调用 check_chunk 且工具有结果 → 提取 partial answer，返回 "__SUPPLEMENT__" + partial，
-         由上游合并 chunk 兜底结果一起回答。
-       - LLM 调用 check_chunk 且工具无结果 → 返回 None，由上游纯 chunk 兜底。
-       - LLM 返空响应 → 代码强制视同 check_chunk，返回 None，防止 silent failure。
+本模块把 timeline 检索的两段式工具调用逻辑实现成一张 LangGraph 子图，节点如下：
+    first_call   — 第一次 LLM 调用，绑定 TIMELINE_TOOLS 填 event_search 参数（或直接作答）。
+    execute_tool — 执行 event_search，累计合法 event_id，结果回填 messages。
+    judge        — 第二次 LLM 调用，绑定 check_chunk 二选一判断（空响应强制兜底）。
+    make_partial — check_chunk 触发后提取 partial，决定 supplement 还是纯 chunk 兜底。
+
+子图入口 Route_Timeline_Node 保持原有返回契约不变（str / "__SUPPLEMENT__"+partial / None），
+上游 route_task._Run_Timeline 无需改动。
 
 调用关系：
-    Route_Timeline_Node → TIMELINE_TOOLS（timeline_tools.py）→ Event_Search（timeline_store.py）
+    Route_Timeline_Node → timeline 子图 → TIMELINE_TOOLS（timeline_tools.py）
+                        → Event_Search（timeline_store.py）
 """
 
 import json
 from pathlib import Path
 
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
+from langgraph.graph import END, START, StateGraph
 
 from rag.config.settings import get_llm
 from rag.graph.citation_check import Validate_Citations
+from rag.graph.state import RetrievalState
 from rag.retrieval.tools.people_tools import CHECK_CHUNK_TOOL
 from rag.retrieval.tools.timeline_tools import TIMELINE_TOOLS
 
@@ -148,88 +148,165 @@ def _Parse_Text_Tool_Call(content: str) -> tuple[str, dict] | None:
     return tool_name, args
 
 
-def Route_Timeline_Node(task_text: str) -> str | None:
-    """Timeline 路由节点主函数。
+# ── LangGraph 子图：把两段式工具调用拆成节点 + 条件边 ─────────────────────────
 
-    用 timeline_plan.md 作为 system prompt，让 LLM 填写 event_search 参数
-    （一次机会，不循环），执行工具后把完整结果回流给第二次 LLM 做判断。
-    第二次 LLM 调用前注入二选一指令，绑定 check_chunk 信号工具：
-    调用 check_chunk 或返空响应均触发 chunk 兜底（空响应由代码强制兜底）。
+def _Node_First_Call(state: RetrievalState) -> dict:
+    """第一次 LLM 调用：绑定 TIMELINE_TOOLS 填 event_search 参数。
 
-    Args:
-        task_text: 当前 task 的问题文本。
-    Returns:
-        - 字符串（不含 sentinel）：LLM 给出的完整文本答案。
-        - "__SUPPLEMENT__" + partial：工具有结果但不完整，上游需合并 chunk 一起回答。
-        - None：工具无结果或 LLM 返空响应，由上游纯 chunk 兜底。
+    未触发 native tool call 时先尝试文本 JSON 降级解析，仍失败就当作直接文本答案收尾。
     """
 
-    system_prompt   = _Load_Skill()
-    _llm            = get_llm()
-    _LLM_WITH_TOOLS = _llm.bind_tools(TIMELINE_TOOLS)
-    _LLM_WITH_CHECK = _llm.bind_tools([CHECK_CHUNK_TOOL])
-
     messages = [
-        SystemMessage(content=system_prompt),
-        HumanMessage(content=task_text),
+        SystemMessage(content = _Load_Skill()),
+        HumanMessage(content = state["task_text"]),
     ]
 
-    response = _LLM_WITH_TOOLS.invoke(messages)
+    response = get_llm().bind_tools(TIMELINE_TOOLS).invoke(messages)
 
     if not response.tool_calls:
         parsed = _Parse_Text_Tool_Call(response.content)
         if not parsed:
             text = _Guard_Citations(response.content, set(), "未调用工具直接作答")
             _Log_Agent_Result(text)
-            return text
+            return {"messages": messages, "result_kind": "answer", "answer": text}
         print("[Timeline] LLM 未触发 native tool call，从文本 JSON 降级解析。")
         tool_name, tool_args = parsed
         response.tool_calls = [{"name": tool_name, "args": tool_args, "id": "text_fallback"}]
 
-    tool_call   = response.tool_calls[0]
-    tool_name   = tool_call["name"]
-    tool_args   = tool_call["args"]
-    tool_result = _Execute_Tool(tool_name, tool_args)
+    call = response.tool_calls[0]
+    return {
+        "messages":     messages + [response],
+        "pending_tool": {"name": call["name"], "args": call["args"], "id": call["id"]},
+    }
 
-    _Log_Tool_Used(tool_name, tool_args)
-    _Log_Tool_Result(tool_result)
 
-    valid_event_ids = _Ids_From_Result(tool_result)
+def _Node_Execute_Tool(state: RetrievalState) -> dict:
+    """执行 event_search，累计合法 event_id，把结果回填进 messages。"""
 
-    messages.append(response)
-    messages.append(
-        ToolMessage(
-            content      = _Clip(tool_result),
-            tool_call_id = tool_call["id"],
-        )
-    )
+    call   = state["pending_tool"]
+    result = _Execute_Tool(call["name"], call["args"])
 
-    # 第二次 LLM 调用前明确二选一，防止 LLM 返空响应导致 silent failure
+    _Log_Tool_Used(call["name"], call["args"])
+    _Log_Tool_Result(result)
+
+    messages = state["messages"] + [
+        ToolMessage(content = _Clip(result), tool_call_id = call["id"])
+    ]
+    return {
+        "messages":  messages,
+        "valid_ids": state["valid_ids"] | _Ids_From_Result(result),
+    }
+
+
+def _Node_Judge(state: RetrievalState) -> dict:
+    """第二次 LLM 调用：绑定 check_chunk 二选一判断，空响应强制兜底。"""
+
     retry_prompt = (
         "工具结果已在上方。请二选一：\n"
         "· 能完整回答 task → 直接输出文本结论，每处引用标 [event_id=N]，严禁展开。\n"
         "· 结果不足以回答（为空 / 缺失关键事件 / 算不出时间差） → 必须调用 check_chunk 触发兜底。\n"
         "严禁返回空响应或解释性文字。"
     )
-    messages.append(HumanMessage(content = retry_prompt))
-    judgment = _LLM_WITH_CHECK.invoke(messages)
+
+    messages = state["messages"] + [HumanMessage(content = retry_prompt)]
+    judgment = get_llm().bind_tools([CHECK_CHUNK_TOOL]).invoke(messages)
 
     if judgment.tool_calls and any(tc["name"] == "check_chunk" for tc in judgment.tool_calls):
-        partial = _Generate_Partial(messages)
-        if partial and not partial.startswith("无"):
-            partial = _Guard_Citations(partial, valid_event_ids, "partial 摘要")
-            if partial == _CITATION_REJECT:
-                return _CITATION_REJECT
-            print("\n[Agent Result] 工具结果不完整，将与 chunk 合并回答。")
-            return _SUPPLEMENT + partial
-        print("\n[Agent Result] 工具无结果，回退至 chunk 兜底检索。")
-        return None
+        return {"messages": messages, "result_kind": "check"}
 
     # 代码兜底：LLM 没听话返空响应时，强制走 chunk
     if not judgment.content or not judgment.content.strip():
         print("\n[Agent Result] LLM 返空响应，强制回退至 chunk 兜底检索。")
-        return None
+        return {"messages": messages, "result_kind": "fallback"}
 
-    text = _Guard_Citations(judgment.content, valid_event_ids, "第二次判断直接给出答案")
+    text = _Guard_Citations(judgment.content, state["valid_ids"], "第二次判断直接给出答案")
     _Log_Agent_Result(text)
-    return text
+    return {"messages": messages, "result_kind": "answer", "answer": text}
+
+
+def _Node_Make_Partial(state: RetrievalState) -> dict:
+    """check_chunk 触发后提取 partial，决定走 supplement 合并还是纯 chunk 兜底。"""
+
+    partial = _Generate_Partial(state["messages"])
+
+    if partial and not partial.startswith("无"):
+        partial = _Guard_Citations(partial, state["valid_ids"], "partial 摘要")
+        if partial == _CITATION_REJECT:
+            return {"result_kind": "answer", "answer": _CITATION_REJECT}
+        print("\n[Agent Result] 工具结果不完整，将与 chunk 合并回答。")
+        return {"result_kind": "supplement", "answer": partial}
+
+    print("\n[Agent Result] 工具无结果，回退至 chunk 兜底检索。")
+    return {"result_kind": "fallback"}
+
+
+def _Route_After_First(state: RetrievalState) -> str:
+    return "end" if state.get("result_kind") == "answer" else "execute"
+
+
+def _Route_After_Judge(state: RetrievalState) -> str:
+    return "partial" if state["result_kind"] == "check" else "end"
+
+
+def _Build_Timeline_Graph():
+    """组装并编译 timeline 检索子图。"""
+
+    builder = StateGraph(RetrievalState)
+
+    builder.add_node("first_call",   _Node_First_Call)
+    builder.add_node("execute_tool", _Node_Execute_Tool)
+    builder.add_node("judge",        _Node_Judge)
+    builder.add_node("make_partial", _Node_Make_Partial)
+
+    builder.add_edge(START, "first_call")
+    builder.add_conditional_edges(
+        "first_call", _Route_After_First,
+        {"execute": "execute_tool", "end": END},
+    )
+    builder.add_edge("execute_tool", "judge")
+    builder.add_conditional_edges(
+        "judge", _Route_After_Judge,
+        {"partial": "make_partial", "end": END},
+    )
+    builder.add_edge("make_partial", END)
+
+    return builder.compile()
+
+
+# 模块加载时编译子图，Route_Timeline_Node 直接调用
+_timeline_graph = _Build_Timeline_Graph()
+
+
+def Route_Timeline_Node(task_text: str) -> str | None:
+    """Timeline 路由子图入口，保持原有返回契约不变。
+
+    构造初始状态后调用编译好的子图，把终态 result_kind 映射回原契约：
+        "answer"     → 文本答案字符串（含直接作答、引用拒答）。
+        "supplement" → "__SUPPLEMENT__" + partial，上游合并 chunk 一起回答。
+        "fallback"   → None，工具无结果或 LLM 返空响应，由上游纯 chunk 兜底。
+
+    Args:
+        task_text: 当前 task 的问题文本。
+    Returns:
+        str / "__SUPPLEMENT__"+partial / None，三种含义同上。
+    """
+
+    init: RetrievalState = {
+        "task_text":    task_text,
+        "messages":     [],
+        "pending_tool": {},
+        "valid_ids":    set(),
+        "tool_round":   0,
+        "result_kind":  "",
+        "answer":       "",
+    }
+    final_state = _timeline_graph.invoke(init)
+
+    kind   = final_state.get("result_kind", "")
+    answer = final_state.get("answer", "")
+
+    if kind == "supplement":
+        return _SUPPLEMENT + answer
+    if kind == "fallback":
+        return None
+    return answer

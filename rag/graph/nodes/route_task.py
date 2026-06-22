@@ -1,7 +1,8 @@
-"""单任务路由节点。
+"""单任务分支执行器。
 
-本模块根据 QU 输出的 plan 做两层路由，并提供 people / timeline / direct 分支的执行入口：
-    Route_Task          — 两层路由入口，subtasks 占位，single 按 intention 分流。
+本模块提供 people / timeline / direct 三个单任务分支的执行入口，供顶层图
+（build.py）的分支节点调用，以及供 orchestrator 的 worker 调用。两层路由本身
+已上移到 build.py 的 agentic_graph，本模块不再负责路由，只负责执行。
     Synthesize_Answer   — 接收 query + chunks（+ 可选 structured_context），调 LLM 综合回答。
     _Run_People         — people 双路并行节点：副线程始终跑 chunk 检索；
                           主线程并行跑 Route_People_Node：
@@ -19,7 +20,6 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from rag.config.settings import get_llm
 from rag.graph.citation_check import Validate_Citations
-from rag.graph.nodes.orchestrator import Run_Orchestrator
 from rag.graph.nodes.route_people import Route_People_Node, _SUPPLEMENT as _PEOPLE_SUPPLEMENT
 from rag.graph.nodes.route_timeline import Route_Timeline_Node, _SUPPLEMENT as _TIMELINE_SUPPLEMENT
 from rag.retrieval.chunk_rrf import Search_Chunks
@@ -99,41 +99,6 @@ _DIRECT_PROMPT = """\
 - 严禁编造新的 id，只能复述历史对话中实际出现过的 id。
 - 简洁直接，不拓展延伸，不做无关解释。\
 """
-
-
-def Route_Task(plan: dict, history: list = [], top_k: int = 10) -> str:
-    """根据 QU 输出的 plan 路由到对应执行分支，返回最终答案字符串。
-
-    Args:
-        plan:    Query_Understanding_Node 返回的查询计划字典，
-                 含 refined_query / task_type / tasks。
-        history: 多轮对话历史，每条含 role / content；direct 分支需要用到。
-    """
-
-    if plan["task_type"] == "subtasks":
-        print("[Router] 多任务 → 路由至 Orchestrator")
-        return Run_Orchestrator(plan, history, top_k=top_k)
-
-    task      = plan["tasks"][0]
-    intention = task["intention"]
-    task_text = task["task"]
-
-    print(f"[Router] 单任务 · intention={intention}")
-    print()
-
-    query_kind = task.get("query_kind", "fact")
-
-    if intention == "people":
-        return _Run_People(task_text, query_kind=query_kind, top_k=top_k)
-
-    elif intention == "timeline":
-        return _Run_Timeline(task_text, query_kind=query_kind, top_k=top_k)
-
-    elif intention == "direct":
-        return _Run_Direct(task_text, history)
-
-    else:
-        raise ValueError(f"未知 intention: {intention!r}")
 
 
 def Synthesize_Answer(

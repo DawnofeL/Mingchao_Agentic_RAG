@@ -1,0 +1,78 @@
+
+flowchart TD
+
+    %% ===== 顶层图：agentic_graph（build.py） =====
+    top_start([START]) --> qu["qu 意图识别"]
+    qu --> top_route{"条件路由"}
+    top_route --> single_people["single_people"]
+    top_route --> single_timeline["single_timeline"]
+    top_route --> single_direct["single_direct"]
+    top_route --> orchestrate["orchestrate"]
+    single_people --> top_end([END])
+    single_timeline --> top_end
+    single_direct --> top_end
+    orchestrate --> top_end
+
+    %% ===== Orchestrator 子图（orchestrator.py） =====
+    subgraph SG_ORCH [" Orchestrator 子图 "]
+        o_start([START]) --> orchestrator["orchestrator"]
+        orchestrator -->|worker| worker["worker"]
+        orchestrator -->|synthesize| synthesize["synthesize"]
+        worker --> orchestrator
+        synthesize --> o_end([END])
+    end
+
+    %% ===== People 子图（route_people.py） =====
+    subgraph SG_PEOPLE [" People 子图 "]
+        p_start([START]) --> p_first["first_call"]
+        p_first -->|execute| p_exec["execute_tool"]
+        p_first -->|end| p_end1([END])
+        p_exec --> p_judge["judge"]
+        p_judge -->|retry| p_retry["execute_retry"]
+        p_judge -->|partial| p_partial["make_partial"]
+        p_judge -->|end| p_end2([END])
+        p_retry --> p_final["final_judge"]
+        p_final -->|partial| p_partial
+        p_final -->|end| p_end3([END])
+        p_partial --> p_end4([END])
+    end
+
+    %% ===== Timeline 子图（route_timeline.py） =====
+    subgraph SG_TIMELINE [" Timeline 子图 "]
+        t_start([START]) --> t_first["first_call"]
+        t_first -->|execute| t_exec["execute_tool"]
+        t_first -->|end| t_end1([END])
+        t_exec --> t_judge["judge"]
+        t_judge -->|partial| t_partial["make_partial"]
+        t_judge -->|end| t_end2([END])
+        t_partial --> t_end3([END])
+    end
+
+    %% ===== Vector 图（build.py，独立入口，不挂在顶层图下） =====
+    subgraph SG_VECTOR [" Vector 图（独立入口） "]
+        v_start([START]) --> v_retrieve["retrieve"] --> v_end([END])
+    end
+
+    %% ===== 顶层节点 → 子图，虚线表示函数调用而非 LangGraph 原生边 =====
+    single_people  -. 调用 .-> p_start
+    single_timeline -. 调用 .-> t_start
+    orchestrate    -. 调用 .-> o_start
+
+    %% ===== 节点上色 =====
+    classDef topStyle      fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
+    classDef orchStyle     fill:#fef3c7,stroke:#b45309,color:#78350f
+    classDef peopleStyle   fill:#dcfce7,stroke:#15803d,color:#14532d
+    classDef timelineStyle fill:#fce7f3,stroke:#be185d,color:#831843
+    classDef vectorStyle   fill:#ede9fe,stroke:#6d28d9,color:#4c1d95
+
+    class qu,single_people,single_timeline,single_direct,orchestrate topStyle
+    class orchestrator,worker,synthesize orchStyle
+    class p_first,p_exec,p_judge,p_retry,p_final,p_partial peopleStyle
+    class t_first,t_exec,t_judge,t_partial timelineStyle
+    class v_retrieve vectorStyle
+
+    %% ===== 子图整体底色，配合 classDef 让框本身也有颜色 =====
+    style SG_ORCH     fill:#fffbeb,stroke:#b45309
+    style SG_PEOPLE   fill:#f0fdf4,stroke:#15803d
+    style SG_TIMELINE fill:#fdf2f8,stroke:#be185d
+    style SG_VECTOR   fill:#f5f3ff,stroke:#6d28d9

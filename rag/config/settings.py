@@ -114,7 +114,15 @@ _llm_cache:    ChatOpenAI | None  = None
 
 
 def get_llm() -> ChatOpenAI:
-    """返回当前有效的 LLM 实例（优先使用运行时覆盖）。"""
+    """返回当前生效的 LLM 客户端。
+
+    没人动过网页配置面板时，直接返回 settings.py 里写死的默认客户端；
+    面板改过模型、API key 或思考模式之后，返回叠加了这些改动的客户端，
+    并缓存复用，避免每次调用都重新构造一个新客户端。
+
+    Returns:
+        当前生效的 ChatOpenAI 客户端。
+    """
     if not _llm_override:
         return LLM
     global _llm_cache
@@ -129,7 +137,17 @@ def get_llm() -> ChatOpenAI:
 
 
 def set_llm_override(model: str | None, api_key: str | None, enable_thinking: bool | None) -> None:
-    """更新运行时覆盖，空值保留默认。清除缓存强制下次重建。"""
+    """把网页配置面板填的模型、API key、思考模式存成运行时覆盖。
+
+    某一项留空（None 或空字符串）就保留默认值，不会被清掉。
+    清空缓存是为了让 get_llm() 下次调用时按新的覆盖重新构造客户端，
+    而不是继续返回改之前缓存的旧客户端。
+
+    Args:
+        model: 要切换的模型名，留空则继续用默认模型。
+        api_key: 要使用的 API key，留空则继续用默认 key。
+        enable_thinking: 是否开启思考模式，留空则继续用默认设置。
+    """
     global _llm_override, _llm_cache
     _llm_override = {}
     if model:                       _llm_override["model"]           = model

@@ -6,6 +6,11 @@
     check_chunk          — 信号工具，第二次 LLM 判断阶段使用，触发 chunk 兜底检索。
 
 PEOPLE_TOOLS 列表由 route_people.py 注册给第一次 LLM 调用；CHECK_CHUNK_TOOL 注册给第二次判断调用。
+
+注意：本模块里每个 @tool 函数的 docstring 不是写给人看的普通注释，@tool 会把它转成
+JSON Schema 的 description 发给模型，模型推理时就是读这段文字来决定怎么填参数。
+里面的枚举值、"填不准就传 null"之类的话都是说给模型听的，删减或精简前要确认不会
+丢掉模型必须知道的约束（比如哪些参数只能取固定枚举值），不能当成普通代码注释随便瘦身。
 """
 
 from langchain_core.tools import tool
