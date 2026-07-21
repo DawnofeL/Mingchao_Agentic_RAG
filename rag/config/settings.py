@@ -91,22 +91,48 @@ CHUNK_SPARSE_FIELD = "sparse_embedding"
 
 # ── LLM ──────────────────────────────────────────────────────────────────────
 
-# 本项目仅适配通义千问 Qwen 系列，base_url 为阿里云 DashScope。
+# 支持两家供应商：通义千问 Qwen（阿里云 DashScope）和 DeepSeek，接口都走 OpenAI 兼容格式。
+# 每家的接口地址、默认模型、取 key 的环境变量、是否支持思考参数都登记在下面这张表里。
+# 思考参数（enable_thinking）是 Qwen 自家的，DeepSeek 接口不认，所以只有 supports_thinking 的家才带。
 # key 不落盘到任何项目文件，推荐运行时提供，优先级最高：
 # 网页右上角配置面板临时填写，或 notebook 里调 set_llm_override
-# 这里仅从环境变量读默认值，作为无界面场景（评测脚本）的兜底，仓库不内置任何 key。
+# 环境变量只作为无界面场景（评测脚本）的兜底，仓库不内置任何 key。
 
-_DEFAULT_API_KEY = os.environ.get("DASHSCOPE_API_KEY", "")
-
-_LLM_BASE_KWARGS = {
-    "model":       "qwen3.7-plus-2026-05-26",
-    "base_url":    "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-    "api_key":     _DEFAULT_API_KEY,
-    "temperature": 0.2,
-    "extra_body":  {"enable_thinking": False},
+_PROVIDERS = {
+    "qwen": {
+        "base_url":          "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        "default_model":     "qwen3.7-plus-2026-05-26",
+        "api_key_env":       "DASHSCOPE_API_KEY",
+        "supports_thinking": True,
+    },
+    "deepseek": {
+        "base_url":          "https://api.deepseek.com/v1",
+        "default_model":     "deepseek-chat",
+        "api_key_env":       "DEEPSEEK_API_KEY",
+        "supports_thinking": False,
+    },
 }
 
-LLM = ChatOpenAI(**_LLM_BASE_KWARGS)
+_DEFAULT_PROVIDER = "qwen"
+
+
+def _build_llm(provider: str, model: str | None, api_key: str | None,
+               enable_thinking: bool | None) -> ChatOpenAI:
+    """按供应商拼一个 LLM 客户端，模型 / key 留空就用该供应商的默认值。"""
+    spec = _PROVIDERS.get(provider, _PROVIDERS[_DEFAULT_PROVIDER])
+    kwargs = {
+        "model":       model or spec["default_model"],
+        "base_url":    spec["base_url"],
+        "api_key":     api_key or os.environ.get(spec["api_key_env"], ""),
+        "temperature": 0.2,
+    }
+    # 只有认这个参数的供应商才带思考开关，DeepSeek 塞了会报错
+    if spec["supports_thinking"]:
+        kwargs["extra_body"] = {"enable_thinking": bool(enable_thinking)}
+    return ChatOpenAI(**kwargs)
+
+
+LLM = _build_llm(_DEFAULT_PROVIDER, None, None, None)
 
 # 运行时覆盖（网页面板写入，无需重启）
 _llm_override: dict               = {}
@@ -117,7 +143,7 @@ def get_llm() -> ChatOpenAI:
     """返回当前生效的 LLM 客户端。
 
     没人动过网页配置面板时，直接返回 settings.py 里写死的默认客户端；
-    面板改过模型、API key 或思考模式之后，返回叠加了这些改动的客户端，
+    面板改过供应商、模型、API key 或思考模式之后，返回按这些改动重建的客户端，
     并缓存复用，避免每次调用都重新构造一个新客户端。
 
     Returns:
@@ -127,30 +153,47 @@ def get_llm() -> ChatOpenAI:
         return LLM
     global _llm_cache
     if _llm_cache is None:
-        kwargs = dict(_LLM_BASE_KWARGS)
-        if "model"           in _llm_override: kwargs["model"]      = _llm_override["model"]
-        if "api_key"         in _llm_override: kwargs["api_key"]    = _llm_override["api_key"]
-        if "enable_thinking" in _llm_override:
-            kwargs["extra_body"] = {"enable_thinking": _llm_override["enable_thinking"]}
-        _llm_cache = ChatOpenAI(**kwargs)
+        _llm_cache = _build_llm(
+            provider        = _llm_override.get("provider", _DEFAULT_PROVIDER),
+            model           = _llm_override.get("model"),
+            api_key         = _llm_override.get("api_key"),
+            enable_thinking = _llm_override.get("enable_thinking"),
+        )
     return _llm_cache
 
 
-def set_llm_override(model: str | None, api_key: str | None, enable_thinking: bool | None) -> None:
-    """把网页配置面板填的模型、API key、思考模式存成运行时覆盖。
+def set_llm_override(provider: str | None, model: str | None, api_key: str | None,
+                     enable_thinking: bool | None) -> None:
+    """把网页配置面板填的供应商、模型、API key、思考模式存成运行时覆盖。
 
     某一项留空（None 或空字符串）就保留默认值，不会被清掉。
     清空缓存是为了让 get_llm() 下次调用时按新的覆盖重新构造客户端，
     而不是继续返回改之前缓存的旧客户端。
 
     Args:
-        model: 要切换的模型名，留空则继续用默认模型。
+        provider: 要切换的供应商（qwen / deepseek），留空则继续用默认供应商。
+        model: 要切换的模型名，留空则用该供应商的默认模型。
         api_key: 要使用的 API key，留空则继续用默认 key。
         enable_thinking: 是否开启思考模式，留空则继续用默认设置。
     """
     global _llm_override, _llm_cache
     _llm_override = {}
+    if provider:                    _llm_override["provider"]        = provider
     if model:                       _llm_override["model"]           = model
     if api_key:                     _llm_override["api_key"]         = api_key
     if enable_thinking is not None: _llm_override["enable_thinking"] = enable_thinking
     _llm_cache = None
+
+
+def current_config() -> dict:
+    """返回当前生效的供应商 / 模型 / 思考模式，供网页面板回显。"""
+    provider = _llm_override.get("provider", _DEFAULT_PROVIDER)
+    spec     = _PROVIDERS.get(provider, _PROVIDERS[_DEFAULT_PROVIDER])
+    return {
+        "provider":          provider,
+        "model":             _llm_override.get("model", spec["default_model"]),
+        "enable_thinking":   bool(_llm_override.get("enable_thinking", False)),
+        "supports_thinking": spec["supports_thinking"],
+        "providers":         list(_PROVIDERS.keys()),
+        "has_override":      bool(_llm_override),
+    }

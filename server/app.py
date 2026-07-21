@@ -1,10 +1,15 @@
 """FastAPI 应用：路由 + SSE 推送。
 
 端点：
-    GET  /                  → web/index.html
-    GET  /health            → {"status":"ok", "ready": bool}
-    GET  /startup-progress  → SSE 流，推送模型加载进度
-    POST /chat              → SSE 流，实时推送 RAG 运行日志和最终答案
+    GET    /                         → web/index.html
+    GET    /health                   → {"status":"ok", "ready": bool}
+    GET    /startup-progress         → SSE 流，推送模型加载进度
+    POST   /chat                     → SSE 流，实时推送 RAG 运行日志和最终答案
+    GET    /conversations            → 列出所有历史对话
+    POST   /conversations            → 新开一场对话，返回编号
+    GET    /conversations/{id}/messages → 读回某场对话的全部消息
+    PATCH  /conversations/{id}       → 重命名某场对话
+    DELETE /conversations/{id}       → 删除某场对话
 """
 
 import asyncio
@@ -20,10 +25,14 @@ from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 
 import rag.config.settings as _settings
+import server.history as _history
 from rag.agent.rag import Agentic_RAG
 from server.schemas import ChatRequest
 
 _WEB = Path(__file__).resolve().parents[1] / "web"
+
+# 启动即建表，已存在则跳过
+_history.init_db()
 
 # 启动状态：由 app.py 的加载线程写入，SSE 端点读取
 _startup_q:    queue.Queue = queue.Queue()
@@ -84,25 +93,72 @@ async def startup_progress() -> EventSourceResponse:
 
 @app.get("/llm-config")
 def get_llm_config() -> dict:
-    """返回当前生效的 LLM 配置（base + override 合并结果）。"""
-    base = _settings._LLM_BASE_KWARGS
-    ov   = _settings._llm_override
-    return {
-        "model":           ov.get("model",           base["model"]),
-        "enable_thinking": ov.get("enable_thinking", base["extra_body"]["enable_thinking"]),
-        "has_override":    bool(ov),
-    }
+    """返回当前生效的 LLM 配置（供应商 / 模型 / 思考模式）。"""
+    return _settings.current_config()
 
 
 @app.post("/llm-config")
 def set_llm_config(req: dict) -> dict:
     """运行时更新 LLM 配置，无需重启。空字符串 = 恢复默认。"""
     _settings.set_llm_override(
+        provider        = req.get("provider") or None,
         model           = req.get("model")    or None,
         api_key         = req.get("api_key")  or None,
         enable_thinking = req.get("enable_thinking"),
     )
     return {"ok": True}
+
+
+# ── 历史对话 ──────────────────────────────────────────────────────────────────
+
+@app.get("/conversations")
+def list_conversations() -> dict:
+    """列出所有历史对话，供侧边栏显示。"""
+    return {"conversations": _history.list_conversations()}
+
+
+@app.post("/conversations")
+def create_conversation(req: dict) -> dict:
+    """新开一场对话，返回它的编号。标题可留空，等第一条提问再自动补。"""
+    cid = _history.create_conversation(title=req.get("title") or None)
+    return {"id": cid}
+
+
+@app.get("/conversations/{cid}/messages")
+def get_conversation_messages(cid: int) -> dict:
+    """读回某场对话的全部消息，供点开历史时加载回聊天区。"""
+    return {"messages": _history.get_messages(cid)}
+
+
+@app.patch("/conversations/{cid}")
+def rename_conversation(cid: int, req: dict) -> dict:
+    """重命名某场对话。"""
+    title = (req.get("title") or "").strip()
+    if not title:
+        raise HTTPException(400, detail="标题不能为空")
+    _history.set_title(cid, title)
+    return {"ok": True}
+
+
+@app.delete("/conversations/{cid}")
+def delete_conversation(cid: int) -> dict:
+    """删除某场对话，连同它的所有消息。"""
+    _history.delete_conversation(cid)
+    return {"ok": True}
+
+
+def _save_turn(cid: int, query: str, answer: str) -> None:
+    """把一问一答存进对应对话；第一条提问顺带补上对话标题。落盘失败不影响回复。"""
+    try:
+        first = _history.message_count(cid) == 0
+        _history.append_message(cid, "user", query)
+        _history.append_message(cid, "assistant", answer)
+        if first:
+            stripped = query.strip()
+            title = stripped.splitlines()[0][:20] if stripped else "新对话"
+            _history.set_title_if_default(cid, title)
+    except Exception as e:
+        print(f"[History] 保存失败：{type(e).__name__}: {e}")
 
 
 @app.post("/chat")
@@ -116,6 +172,12 @@ async def chat(req: ChatRequest) -> EventSourceResponse:
 
     if not _startup_done:
         raise HTTPException(503, detail="模型尚未加载完成，请稍候")
+
+    # 带了有效编号就接着存，没带或编号已不存在（别处删了）都新开一场，避免消息挂到空编号上
+    if req.conversation_id is not None and _history.conversation_exists(req.conversation_id):
+        cid = req.conversation_id
+    else:
+        cid = _history.create_conversation()
 
     q: queue.Queue = queue.Queue()
     history = [{"role": m.role, "content": m.content} for m in req.history]
@@ -133,12 +195,15 @@ async def chat(req: ChatRequest) -> EventSourceResponse:
             answer = err
         finally:
             sys.stdout = real
+            _save_turn(cid, req.query, answer or "")   # 这一问一答落盘
             q.put(("answer", answer or ""))   # 先推最终答案，走独立通道
             q.put(None)                        # 哨兵：通知 SSE 生成器停止
 
     threading.Thread(target=_run, daemon=True).start()
 
     async def _gen():
+        # 开头先把对话编号告诉前端，方便它同步「当前是第几场」
+        yield {"event": "conversation", "data": json.dumps({"id": cid}, ensure_ascii=False)}
         while True:
             try:
                 item = q.get_nowait()

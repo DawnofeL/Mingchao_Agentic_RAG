@@ -23,6 +23,9 @@ data/milvus_lite.db/
 data/*.lock
 data/.*.lock
 
+# 本地对话历史：个人聊天记录，不入仓库
+data/history.db
+
 # 大语料：仅保留实际启动用到的 _1_661.json，其余构建中间产物不入仓库
 data/raw/mingchao_vectorized.json
 data/raw/mingchao_chunks.json
