@@ -31,8 +31,10 @@ jobs:
     steps:
       - uses: CodeBoarding/CodeBoarding-action@v1
         with:
-          # Free tier needs no secret — these fall through to the hosted OIDC tier when
-          # unset. Add either repo secret (Settings → Secrets and variables → Actions)
-          # for more/unmetered usage; no YAML edit required.
-          llm_api_key: ${{ secrets.OPENROUTER_API_KEY }}   # BYO LLM provider key (OpenRouter)
-          license_key: ${{ secrets.CODEBOARDING_LICENSE }}  # CodeBoarding paid plan
+          # Your own DeepSeek key. Add DEEPSEEK_API_KEY under Settings → Secrets and
+          # variables → Actions and every run calls DeepSeek directly with it.
+          # Until that secret exists this is an empty string and the run falls back to
+          # CodeBoarding's free hosted tier (what id-token: write above is for).
+          llm_provider: deepseek
+          llm_api_key: ${{ secrets.DEEPSEEK_API_KEY }}   # your DeepSeek key
+          license_key: ${{ secrets.CODEBOARDING_LICENSE }}  # CodeBoarding paid plan (used only when no key is set)
