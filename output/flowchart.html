@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic RAG V2 · 架构流程图 — 明朝那些事儿</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:      #ECE8DF;
+  --bg2:     #E5E0D5;
+  --dark:    #1C1A12;
+  --dark2:   #262318;
+
+  --t1: #1C1A12;
+  --t2: rgba(28,26,18,0.60);
+  --t3: rgba(28,26,18,0.38);
+  --tw:  #F4F1E8;
+  --tw2: rgba(244,241,232,0.72);
+  --tw3: rgba(244,241,232,0.42);
+
+  /* 森林色板 · 自然科学与生命 */
+  --moss:   #4A6741;
+  --kombu:  #2D4E30;
+  --arti:   #7E9570;
+  --lime:   #B6C849;
+  --cedar:  #8A5030;
+  --amber:  #B8820A;
+  --oak:    #8A6A2A;
+  --teal:   #3A6A66;
+  --bark:   #7A6E58;
+  --rust:   #B06A4A;
+
+  --moss2:  rgba(74,103,65,0.16);
+  --kombu2: rgba(45,78,48,0.18);
+  --lime2:  rgba(182,200,73,0.22);
+  --cedar2: rgba(138,80,48,0.16);
+  --amber2: rgba(184,130,10,0.16);
+  --teal2:  rgba(58,106,102,0.16);
+  --rust2:  rgba(176,106,74,0.18);
+  --oak2:   rgba(138,106,42,0.16);
+
+  --expo:   cubic-bezier(0.16,1,0.3,1);
+  --spring: cubic-bezier(0.34,1.4,0.5,1);
+  --smooth: cubic-bezier(0.25,0.46,0.45,0.94);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:var(--bg); overflow:hidden; }
+body {
+  font-family:'Be Vietnam Pro', sans-serif;
+  color:var(--t1);
+  -webkit-font-smoothing:antialiased;
+  user-select:none; -webkit-user-select:none;
+}
+
+/* ── 背景三层 ───────────────────────────────────────── */
+.bg-grid {
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:radial-gradient(circle, rgba(28,26,18,0.05) 1px, transparent 1px);
+  background-size:30px 30px;
+}
+.bg-glow {
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 18% 22%, rgba(74,103,65,0.07), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 82% 80%, rgba(138,80,48,0.06), transparent 70%);
+}
+.grain {
+  position:fixed; inset:0; pointer-events:none; z-index:1; opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:160px 160px;
+}
+
+/* ── HUD ────────────────────────────────────────────── */
+.hud-divider {
+  position:fixed; top:64px; left:30px; width:188px; height:1px; z-index:40; pointer-events:none;
+  background:linear-gradient(90deg, rgba(138,80,48,0.40) 0, rgba(138,80,48,0.12) 60%, transparent 100%);
+}
+.hud-left  { position:fixed; top:22px; left:30px; z-index:50; pointer-events:none; }
+.hud-acc   { width:18px; height:2px; background:var(--lime); margin-bottom:8px; }
+.hud-title { font-size:14px; font-weight:800; letter-spacing:0.04em; color:var(--t1); }
+.hud-sub   { font-family:'JetBrains Mono',monospace; font-size:7.5px; color:var(--t3);
+             letter-spacing:0.22em; margin-top:5px; text-transform:uppercase; }
+
+.hud-right { position:fixed; top:22px; right:30px; z-index:50; pointer-events:none; text-align:right; }
+.hud-badge { font-family:'JetBrains Mono',monospace; font-size:7px; letter-spacing:0.2em;
+             color:var(--t3); text-transform:uppercase; }
+.hud-name  { font-size:12px; font-weight:700; letter-spacing:0.06em; color:var(--t1); margin-top:5px; }
+
+/* ── 画布视口 ───────────────────────────────────────── */
+#viewport {
+  position:fixed; inset:0; z-index:10; overflow:hidden;
+  cursor:grab; touch-action:none;
+  user-select:none; -webkit-user-select:none;
+}
+#viewport.grabbing { cursor:grabbing; }
+#canvas {
+  position:absolute; top:0; left:0;
+  width:2950px; height:2520px;
+  transform-origin:0 0;
+  will-change:transform;
+}
+
+/* 区域水印标签 */
+.region {
+  position:absolute; transform:translate(-50%,-50%);
+  font-family:'JetBrains Mono',monospace; letter-spacing:0.34em;
+  text-transform:uppercase; color:rgba(28,26,18,0.11);
+  font-size:13px; font-weight:500; pointer-events:none; white-space:nowrap; z-index:1;
+}
+.region .r-tick { display:inline-block; width:22px; height:1px; background:rgba(28,26,18,0.15);
+  vertical-align:middle; margin-right:10px; }
+
+/* 连线层 */
+#edges { position:absolute; top:0; left:0; width:100%; height:100%; z-index:2; pointer-events:none; overflow:visible; }
+.edge-base { fill:none; stroke:rgba(28,26,18,0.24); stroke-width:1.5; transition:opacity 0.4s ease; }
+.edge-base.e-dash     { stroke:rgba(184,130,10,0.48); stroke-dasharray:6 5; }
+.edge-base.e-feedback { stroke:rgba(58,106,102,0.45); stroke-dasharray:5 6; }
+.edge-base.ehidden, .edge-flow.ehidden { opacity:0 !important; }
+.edge-flow { fill:none; stroke:rgba(28,26,18,0.15); stroke-width:1.5;
+  stroke-dasharray:1.5 13; stroke-linecap:round; animation:dashflow 1.7s linear infinite;
+  opacity:0; transition:opacity 0.9s ease; }
+.edge-flow.live { opacity:1; }
+@keyframes dashflow { to { stroke-dashoffset:-29; } }
+
+/* 边标签 — 默认隐藏，随对应边长完才淡入 */
+#labelLayer { position:absolute; top:0; left:0; width:100%; height:100%; z-index:3; pointer-events:none; }
+.elabel {
+  position:absolute; transform:translate(-50%,-50%);
+  font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.03em;
+  color:var(--t2); background:var(--bg); padding:2px 8px; border-radius:5px;
+  border:1px solid rgba(28,26,18,0.08); white-space:nowrap;
+  opacity:0; transition:opacity 0.5s ease;
+}
+.elabel.show { opacity:1; }
+.elabel.ehidden { opacity:0 !important; }
+
+/* ── 节点 ───────────────────────────────────────────── */
+.node { position:absolute; transform:translate(-50%,-50%); z-index:5; transition:opacity 0.42s var(--smooth); }
+.node.collapsed-hidden { opacity:0; pointer-events:none; }
+
+/* 折叠角标 +N — 自然深色底，提示底下还藏着多少节点 */
+.node-badge {
+  position:absolute; right:-9px; bottom:-9px; z-index:8;
+  min-width:23px; height:23px; padding:0 7px; border-radius:12px;
+  background:#39342700; color:#EDE7D7;
+  font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:500;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 3px 10px rgba(28,26,18,0); border:1px solid transparent;
+  opacity:0; transform:scale(0.5); pointer-events:none;
+  transition:opacity 0.32s ease, transform 0.32s var(--spring), background 0.32s ease, box-shadow 0.32s ease;
+}
+.node-badge.on {
+  opacity:1; transform:scale(1); pointer-events:auto; cursor:pointer;
+  background:#3A3528; box-shadow:0 4px 12px rgba(28,26,18,0.25);
+  border-color:rgba(182,200,73,0.35);
+}
+.card {
+  position:relative; border-radius:13px; padding:13px 17px 14px; cursor:pointer;
+  opacity:0; transform:translateY(10px) scale(0.965);
+  transition: opacity 0.6s var(--smooth),
+              transform 0.72s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.35s var(--smooth), background 0.3s ease;
+  overflow:hidden;
+}
+.card.shown { opacity:1; transform:translateY(0) scale(1); }
+.card.shown:hover { transform:translateY(-2px) scale(1.035); z-index:9; }
+
+/* 选中态 — lime 描边环 + 提升，停掉呼吸把焦点收在当前节点 */
+.card.selected {
+  animation:none !important;
+  transform:translateY(-3px) scale(1.045) !important;
+  outline:2px solid rgba(182,200,73,0.9); outline-offset:3px;
+  box-shadow:0 18px 46px rgba(28,26,18,0.26), 0 0 32px rgba(182,200,73,0.30) !important;
+  z-index:14 !important;
+}
+
+.n-step  { font-family:'JetBrains Mono',monospace; font-size:7.5px; letter-spacing:0.16em;
+           text-transform:uppercase; margin-bottom:6px; }
+.n-title { font-size:13.5px; font-weight:700; letter-spacing:-0.01em; line-height:1.25; }
+.n-sub   { font-size:10px; font-weight:400; line-height:1.4; margin-top:4px; }
+.n-pills { display:flex; flex-wrap:wrap; gap:4px; margin-top:9px; }
+.pill {
+  font-family:'JetBrains Mono',monospace; font-size:7px; letter-spacing:0.06em;
+  padding:2px 7px; border-radius:4px; white-space:nowrap;
+}
+.n-accent { position:absolute; left:17px; bottom:9px; width:26px; height:2px; border-radius:2px; }
+
+.k-dark  { background:var(--dark); width:212px; box-shadow:0 5px 22px rgba(28,26,18,0.16); }
+.k-dark::before { content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(244,241,232,0.06) 0%, transparent 55%); pointer-events:none; }
+.k-dark:hover { box-shadow:0 14px 38px rgba(28,26,18,0.26); }
+.k-dark .n-step  { color:var(--tw3); }
+.k-dark .n-title { color:var(--tw); }
+.k-dark .n-sub   { color:var(--tw2); }
+
+.k-glass {
+  background:linear-gradient(158deg, rgba(253,251,246,0.88), rgba(242,238,228,0.8)); width:200px;
+  border:1px solid rgba(28,26,18,0.07);
+  box-shadow:0 4px 18px rgba(28,26,18,0.05), inset 0 1px 0 rgba(255,255,255,0.75);
+  backdrop-filter:blur(7px);
+}
+.k-glass:hover { background:linear-gradient(158deg, rgba(255,253,249,0.96), rgba(247,243,233,0.9));
+  box-shadow:0 12px 30px rgba(28,26,18,0.12); }
+.k-glass .n-step  { color:var(--t3); }
+.k-glass .n-title { color:var(--t1); }
+.k-glass .n-sub   { color:var(--t2); }
+
+.k-core {
+  background:var(--dark2); width:236px;
+  border:1px solid rgba(182,200,73,0.22);
+  box-shadow:0 6px 30px rgba(28,26,18,0.24), 0 0 44px rgba(182,200,73,0.07);
+}
+.k-core.live { animation:breathe 4.6s ease-in-out infinite; }
+.k-core::before { content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(182,200,73,0.08) 0%, transparent 60%); pointer-events:none; }
+.k-core:hover { box-shadow:0 16px 46px rgba(28,26,18,0.3), 0 0 52px rgba(182,200,73,0.16); }
+.k-core .n-step  { color:rgba(182,200,73,0.8); }
+.k-core .n-title { color:var(--tw); font-size:15px; }
+.k-core .n-sub   { color:var(--tw2); }
+@keyframes breathe {
+  0%,100% { box-shadow:0 6px 30px rgba(28,26,18,0.24), 0 0 40px rgba(182,200,73,0.06); }
+  50%     { box-shadow:0 6px 32px rgba(28,26,18,0.27), 0 0 60px rgba(182,200,73,0.18); }
+}
+
+.k-out {
+  background:rgba(45,78,48,0.10); width:198px;
+  border:1px solid rgba(45,78,48,0.30);
+  box-shadow:0 3px 16px rgba(45,78,48,0.08);
+}
+.k-out.live { animation:glowpulse 4.4s ease-in-out infinite; }
+.k-out:hover { background:rgba(45,78,48,0.16); box-shadow:0 12px 30px rgba(45,78,48,0.18); }
+.k-out .n-step  { color:var(--kombu); opacity:0.7; }
+.k-out .n-title { color:var(--kombu); }
+.k-out .n-sub   { color:var(--moss); }
+@keyframes glowpulse {
+  0%,100% { box-shadow:0 3px 16px rgba(45,78,48,0.08); }
+  50%     { box-shadow:0 3px 20px rgba(45,78,48,0.18), 0 0 26px rgba(45,78,48,0.10); }
+}
+
+.k-warn {
+  background:rgba(176,106,74,0.10); width:198px;
+  border:1px solid rgba(176,106,74,0.32);
+  box-shadow:0 3px 16px rgba(176,106,74,0.08);
+}
+.k-warn:hover { background:rgba(176,106,74,0.16); box-shadow:0 12px 30px rgba(176,106,74,0.16); }
+.k-warn .n-step  { color:var(--rust); opacity:0.8; }
+.k-warn .n-title { color:#8a4226; }
+.k-warn .n-sub   { color:var(--rust); }
+
+.k-start { background:var(--dark); width:188px; box-shadow:0 5px 22px rgba(28,26,18,0.16); }
+.k-start .n-step  { color:rgba(182,200,73,0.78); }
+.k-start .n-title { color:var(--tw); }
+.k-start .n-sub   { color:var(--tw2); }
+
+/* ── 控件 ───────────────────────────────────────────── */
+.controls { position:fixed; bottom:28px; right:30px; z-index:50; display:flex; flex-direction:column; gap:6px; }
+.ctrl-btn {
+  width:34px; height:34px; border-radius:8px; cursor:pointer;
+  background:rgba(255,255,255,0.62); border:1px solid rgba(28,26,18,0.12);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; color:var(--t2); font-family:'JetBrains Mono',monospace;
+  box-shadow:0 2px 10px rgba(28,26,18,0.06); transition:all 0.18s; user-select:none;
+  backdrop-filter:blur(8px);
+}
+.ctrl-btn:hover { background:rgba(255,255,255,0.85); color:var(--t1); transform:translateY(-1px); }
+.ctrl-btn svg { width:15px; height:15px; }
+.ctrl-sep { height:1px; margin:2px 5px; background:rgba(28,26,18,0.12); }
+
+/* ── 底部抽屉 ───────────────────────────────────────── */
+#drawer {
+  position:fixed; top:0; right:0; bottom:0; z-index:60; width:400px;
+  background:#E2DDD0; border-left:1px solid rgba(28,26,18,0.10);
+  padding:26px 30px 0; transform:translateX(100%); visibility:hidden;
+  transition:transform 0.52s var(--expo), visibility 0s linear 0.52s;
+  box-shadow:-8px 0 44px rgba(28,26,18,0.14);
+  overflow:hidden;
+  display:flex; flex-direction:column;
+  user-select:text; -webkit-user-select:text;
+}
+#drawer.open { transform:translateX(0); visibility:visible;
+  transition:transform 0.52s var(--expo), visibility 0s linear 0s; }
+.d-head { display:flex; justify-content:space-between; align-items:flex-start;
+  width:100%; max-width:1100px; margin:0 auto; flex-shrink:0; }
+.d-badge { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:7px;
+  letter-spacing:0.2em; text-transform:uppercase; padding:4px 11px; border-radius:4px; margin-bottom:9px; }
+.d-title { font-size:23px; font-weight:800; letter-spacing:-0.02em; color:#1C1610; }
+.d-sub   { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--t3); letter-spacing:0.05em; margin-top:7px; }
+.d-close { background:none; border:1px solid rgba(28,26,18,0.16); border-radius:6px;
+  padding:6px 12px; cursor:pointer; font-size:15px; color:var(--t3); line-height:1; transition:all 0.16s; }
+.d-close:hover { background:rgba(28,26,18,0.07); color:#1C1610; }
+.d-body { width:100%; max-width:1100px; margin:14px auto 0; padding-bottom:28px;
+  flex:1; overflow-y:auto; font-size:13.5px; line-height:1.9; color:var(--t2); }
+.d-body .ph {
+  font-size:12px; color:var(--t3); padding:14px 18px;
+  background:rgba(74,103,65,0.06); border-left:2px solid rgba(74,103,65,0.28);
+  border-radius:0 6px 6px 0; line-height:1.8;
+}
+.d-body .ph b { color:var(--moss); font-weight:600; }
+
+/* 抽屉正文排版 */
+.d-lead { font-size:14.5px; color:var(--t1); line-height:1.85; margin-bottom:4px; }
+.d-lead b { color:var(--cedar); font-weight:700; }
+.d-sec-l {
+  font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:0.18em;
+  text-transform:uppercase; color:var(--t3); margin:20px 0 10px;
+  display:flex; align-items:center; gap:10px;
+}
+.d-sec-l::after { content:''; flex:1; height:1px; background:rgba(28,26,18,0.08); }
+.d-note {
+  font-size:12.5px; color:var(--t2); padding:12px 16px; line-height:1.8;
+  background:rgba(74,103,65,0.07); border-left:2px solid rgba(74,103,65,0.30);
+  border-radius:0 6px 6px 0; margin:12px 0;
+}
+.d-note.amber { background:rgba(184,130,10,0.07); border-left-color:rgba(184,130,10,0.36); }
+.d-note.rust  { background:rgba(176,106,74,0.08); border-left-color:rgba(176,106,74,0.38); }
+.d-note b { color:var(--moss); font-weight:600; }
+.d-note.amber b { color:var(--amber); }
+.d-note.rust b  { color:var(--rust); }
+.d-k {
+  font-family:'JetBrains Mono',monospace; font-size:0.9em;
+  background:rgba(28,26,18,0.06); padding:1px 6px; border-radius:4px; color:var(--cedar);
+}
+.d-rows { display:flex; flex-direction:column; margin:12px 0; }
+.d-row { display:flex; gap:16px; padding:9px 2px; border-bottom:1px solid rgba(28,26,18,0.06); font-size:12.5px; }
+.d-row .rk { flex:0 0 150px; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--cedar); line-height:1.5; }
+.d-row .rv { flex:1; color:var(--t2); line-height:1.6; }
+.d-ul { margin:10px 0; padding:0; list-style:none; }
+.d-ul li { position:relative; padding-left:19px; margin-bottom:9px; font-size:13px; color:var(--t2); line-height:1.7; }
+.d-ul li::before { content:''; position:absolute; left:4px; top:9px; width:5px; height:5px; border-radius:50%; background:var(--moss); }
+.d-ul li b { color:var(--t1); font-weight:600; }
+
+.d-body::-webkit-scrollbar { width:7px; }
+.d-body::-webkit-scrollbar-track { background:transparent; }
+.d-body::-webkit-scrollbar-thumb { background:rgba(28,26,18,0.16); border-radius:4px; }
+.d-body::-webkit-scrollbar-thumb:hover { background:rgba(28,26,18,0.28); }
+
+/* ── 参考图同款富文本：出处引用 / 代码约束·提示词约束 / 可展开源码 ── */
+.d-body h4 { font-size:11px; font-weight:700; color:var(--t1); text-transform:uppercase; letter-spacing:0.08em; margin:18px 0 7px; }
+.d-body p { margin:8px 0; }
+.d-body code { font-family:'JetBrains Mono',monospace; font-size:11px; background:rgba(28,26,18,0.07); padding:1px 5px; border-radius:3px; color:var(--cedar); }
+.d-body table { width:100%; border-collapse:collapse; font-size:12px; margin:10px 0; }
+.d-body th { text-align:left; padding:4px 8px; border-bottom:2px solid rgba(28,26,18,0.14); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--t3); }
+.d-body td { padding:5px 8px; border-bottom:1px solid rgba(28,26,18,0.07); vertical-align:top; line-height:1.55; }
+/* 源码原文块 + 中文翻译块 */
+.d-body .src { font-family:'JetBrains Mono',monospace; font-size:10.5px; line-height:1.65; background:rgba(28,26,18,0.06); border-left:2px solid rgba(74,103,65,0.40); padding:10px 12px; border-radius:0 6px 6px 0; margin:8px 0; white-space:pre-wrap; word-break:break-word; }
+.d-body .tr { font-size:12px; padding:8px 12px; background:rgba(74,103,65,0.07); border-radius:6px; margin:4px 0 10px; line-height:1.7; }
+/* 出处引用：文件:行号 */
+.ref { font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--moss); background:rgba(74,103,65,0.12); padding:1px 5px; border-radius:3px; white-space:nowrap; }
+/* 代码约束 vs 提示词约束 双色小标题 */
+.d-body h4.code, .d-body h4.prompt { padding:5px 10px; border-radius:5px; text-transform:none; font-size:11.5px; letter-spacing:0.02em; }
+.d-body h4.code   { background:rgba(74,103,65,0.12);  color:var(--moss);  border-left:3px solid var(--moss); }
+.d-body h4.prompt { background:rgba(184,130,10,0.13); color:var(--amber); border-left:3px solid var(--amber); }
+/* 可展开看源码原文 + 翻译 */
+.d-body details.d-exp { margin:10px 0; border:1px solid rgba(184,130,10,0.28); border-radius:6px; overflow:hidden; }
+.d-body details.d-exp summary { cursor:pointer; padding:7px 11px; background:rgba(184,130,10,0.07); font-size:11.5px; font-weight:600; color:var(--cedar); display:flex; align-items:center; gap:7px; list-style:none; user-select:none; }
+.d-body details.d-exp summary::-webkit-details-marker { display:none; }
+.d-body details.d-exp summary::before { content:'▶'; font-size:8px; color:var(--amber); display:inline-block; transition:transform 0.15s ease; }
+.d-body details[open].d-exp summary::before { transform:rotate(90deg); }
+.d-body details.d-exp .exp-in { padding:10px 12px; border-top:1px solid rgba(184,130,10,0.18); }
+.d-body details.d-exp .exp-in > .src { margin:0 0 8px; }
+.d-body details.d-exp .exp-in > .tr  { margin:0; }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="bg-grid"></div>
+<div class="grain"></div>
+
+<div class="hud-divider"></div>
+<div class="hud-left">
+  <div class="hud-acc"></div>
+  <div class="hud-title">Agentic RAG V2</div>
+  <div class="hud-sub">明朝那些事儿 · 架构流程图</div>
+</div>
+<div class="hud-right">
+  <div class="hud-badge">Architecture Map</div>
+  <div class="hud-name">RAG_Ming_Refine</div>
+</div>
+
+<div id="viewport">
+  <div id="canvas">
+    <svg id="edges"></svg>
+    <div id="labelLayer"></div>
+    <div id="nodeLayer"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="ctrl-btn" id="expandAll" title="全部展开">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l5 5 5-5"/><path d="M7 13l5 5 5-5"/></svg>
+  </div>
+  <div class="ctrl-btn" id="collapseAll" title="全部收起">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11l5-5 5 5"/><path d="M7 17l5-5 5 5"/></svg>
+  </div>
+  <div class="ctrl-sep"></div>
+  <div class="ctrl-btn" id="zin">+</div>
+  <div class="ctrl-btn" id="zout">−</div>
+  <div class="ctrl-btn" id="zhome" title="复位">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M5 9v11h14V9"/></svg>
+  </div>
+</div>
+
+<div id="drawer">
+  <div class="d-head">
+    <div>
+      <span class="d-badge" id="d-badge"></span>
+      <div class="d-title" id="d-title"></div>
+      <div class="d-sub" id="d-sub"></div>
+    </div>
+    <button class="d-close" id="d-close">×</button>
+  </div>
+  <div class="d-body" id="d-body"></div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────
+   节点定义 — 坐标为节点中心 (x,y)；role 决定点缀色
+   ───────────────────────────────────────────────────────── */
+const NODES = [
+  {id:'A',   x:1280, y:70,   kind:'start', role:'lime',  step:'Input',         title:'用户问题',            sub:'raw_query 入口'},
+  {id:'RAG', x:1280, y:205,  kind:'core',  role:'lime',  step:'Dispatch',      title:'Agentic_RAG',         sub:'mode 分发 · vector / agentic', pills:[['VECTOR','teal'],['AGENTIC','cedar']]},
+
+  {id:'VG0', x:390,  y:380,  kind:'glass', role:'teal',  step:'Vector · 01',   title:'装入问题，启动检索',   sub:'vector_graph · 无 LLM'},
+  {id:'VG1', x:390,  y:498,  kind:'glass', role:'teal',  step:'Vector · 02',   title:'编译为 LangGraph 图',  sub:'StateGraph · VectorState'},
+  {id:'VG2', x:390,  y:616,  kind:'glass', role:'teal',  step:'Vector · 03',   title:'执行检索',            sub:'_Retrieve_Node'},
+  {id:'VG3', x:390,  y:734,  kind:'glass', role:'teal',  step:'Vector · 04',   title:'四步召回原文',         sub:'dense + sparse · RRF · reranker', pills:[['BGE-M3','teal'],['RRF','teal'],['RERANK','amber']]},
+  {id:'VG4', x:390,  y:864,  kind:'glass', role:'moss',  step:'Vector · 05',   title:'基于原文生成答案',      sub:'Synthesize_Answer · 标 chunk_id'},
+  {id:'VG5', x:390,  y:982,  kind:'out',   role:'kombu', step:'Output',        title:'返回 top-10 原文答案', sub:'毫秒级 · 零 LLM 成本'},
+
+  {id:'AM0', x:1280, y:380,  kind:'glass', role:'cedar', step:'Agentic · 00',  title:'进入 Agentic 模式',    sub:'Run_Agentic_Mode'},
+  {id:'QU1', x:1280, y:498,  kind:'glass', role:'cedar', step:'Agentic · 01',  title:'理解问题',            sub:'Query Understanding · 出查询计划'},
+  {id:'QU2', x:1280, y:616,  kind:'glass', role:'cedar', step:'Agentic · 02',  title:'加载意图识别指令',     sub:'query_understanding.md'},
+  {id:'QU3', x:1280, y:734,  kind:'glass', role:'moss',  step:'Agentic · 03',  title:'输出查询计划',         sub:'强制 JSON 模式'},
+  {id:'QU4', x:1280, y:852,  kind:'glass', role:'amber', step:'Agentic · 04',  title:'代码校验计划合法性',   sub:'不合格打回重试 ×2', pills:[['VALIDATE','amber']]},
+  {id:'RT',  x:1280, y:976,  kind:'core',  role:'cedar', step:'Route',         title:'按问题类型分流',       sub:'单任务 / 多任务'},
+
+  {id:'DIR', x:760,  y:1130, kind:'glass', role:'cedar', step:'Intent · direct',   title:'直接回复',          sub:'_Run_Direct · 无检索'},
+  {id:'PP',  x:1080, y:1130, kind:'glass', role:'cedar', step:'Intent · people',   title:'人物线检索',        sub:'结构化 + chunk 兜底'},
+  {id:'TL',  x:1400, y:1130, kind:'glass', role:'cedar', step:'Intent · timeline', title:'时间线检索',        sub:'结构化 + chunk 双路'},
+  {id:'SUB', x:1830, y:1130, kind:'glass', role:'oak',   step:'Intent · subtasks', title:'多任务编排',        sub:'进入 Orchestrator'},
+
+  {id:'X0',  x:1190, y:1300, kind:'core',  role:'oak',   step:'Executor',      title:'结构化执行器',         sub:'_Run_People / _Run_Timeline'},
+  {id:'CF',  x:1560, y:1430, kind:'glass', role:'teal',  step:'Parallel',      title:'副线程预跑原文检索',    sub:'Search_Chunks · 后台并行'},
+
+  {id:'R1',  x:920,  y:1430, kind:'glass', role:'cedar', step:'Struct · 01',   title:'进入结构化检索',        sub:'Route_People / Route_Timeline'},
+  {id:'R2',  x:920,  y:1548, kind:'glass', role:'cedar', step:'Struct · 02',   title:'加载 plan skill',       sub:'people_plan / timeline_plan'},
+  {id:'R3',  x:920,  y:1666, kind:'glass', role:'moss',  step:'Struct · 03',   title:'LLM 选择工具',          sub:'native tool call'},
+  {id:'R4',  x:920,  y:1784, kind:'glass', role:'oak',   step:'Struct · 04',   title:'执行结构化工具',         sub:'people_search / event_search'},
+  {id:'R5',  x:920,  y:1902, kind:'glass', role:'oak',   step:'Struct · 05',   title:'工具结果回流',           sub:'结果交回 LLM'},
+  {id:'R6',  x:920,  y:2020, kind:'glass', role:'amber', step:'Struct · 06',   title:'第二次 LLM 判断',        sub:'绑定工具 + check_chunk', pills:[['2ND LLM','amber']]},
+  {id:'R6R', x:640,  y:2150, kind:'glass', role:'oak',   step:'Retry',         title:'重试另一个工具',         sub:'仅 people 节点'},
+  {id:'R6F', x:640,  y:2270, kind:'glass', role:'amber', step:'Struct · 07',   title:'第三次 LLM 最终判断',     sub:'绑定 check_chunk'},
+  {id:'R7',  x:920,  y:2400, kind:'out',   role:'kombu', step:'Output',        title:'结构化直接答案',         sub:'people_id / event_id'},
+  {id:'R8',  x:1240, y:2400, kind:'warn',  role:'rust',  step:'Fallback',      title:'check_chunk 被调用',     sub:'工具结果不足'},
+
+  {id:'C1',  x:1560, y:1620, kind:'glass', role:'teal',  step:'Chunk · 01',    title:'chunk 检索入口',         sub:'副线程结果汇入'},
+  {id:'C2',  x:1560, y:1738, kind:'glass', role:'teal',  step:'Chunk · 02',    title:'打印 chunk 摘要',        sub:'chunk_id / rerank / rrf'},
+  {id:'C3',  x:1560, y:1856, kind:'glass', role:'moss',  step:'Chunk · 03',    title:'基于原文生成答案',       sub:'只基于参考段落'},
+  {id:'C4',  x:1560, y:1974, kind:'out',   role:'kombu', step:'Output',        title:'Chunk 答案',            sub:'或知识库不足'},
+
+  {id:'O0',  x:2200, y:1300, kind:'core',  role:'oak',   step:'Orch · 00',     title:'多任务编排器',           sub:'LangGraph 编排子图'},
+  {id:'OP',  x:2200, y:1430, kind:'glass', role:'oak',   step:'Orch · pool',   title:'全局答案池',             sub:'按 task_id 聚合结果'},
+  {id:'O2',  x:2200, y:1548, kind:'glass', role:'oak',   step:'Orch · 01',     title:'选择可执行任务',          sub:'依赖已满足'},
+  {id:'O3',  x:2200, y:1666, kind:'glass', role:'cedar', step:'Orch · 02',     title:'判断依赖',               sub:'是否依赖上游答案'},
+  {id:'O4',  x:2010, y:1790, kind:'glass', role:'oak',   step:'Orch · 03a',    title:'无依赖任务',             sub:'原任务直接入队'},
+  {id:'O5',  x:2410, y:1790, kind:'glass', role:'cedar', step:'Orch · 03b',    title:'有依赖任务',             sub:'读取上游答案池'},
+  {id:'O6',  x:2410, y:1908, kind:'glass', role:'moss',  step:'Orch · 04',     title:'解引用 / 枚举展开',       sub:'0 / 1 / N 条具体问题'},
+  {id:'O7',  x:2410, y:2026, kind:'warn',  role:'rust',  step:'Blocked',       title:'阻塞占位',               sub:'无法展开'},
+  {id:'O8',  x:2010, y:2026, kind:'glass', role:'oak',   step:'Orch · 05',     title:'入本轮队列',             sub:'按类型走检索路径'},
+  {id:'O9',  x:2200, y:2144, kind:'glass', role:'oak',   step:'Orch · 06',     title:'结果回写答案池',          sub:'按父 task_id 聚合'},
+  {id:'O10', x:2200, y:2262, kind:'glass', role:'moss',  step:'Orch · 07',     title:'答案池完整',             sub:'交终答合成'},
+  {id:'O11', x:2200, y:2380, kind:'out',   role:'kombu', step:'Final',         title:'最终答案',               sub:'保留全部引用锚点'},
+];
+
+/* 连线定义 — 默认 b→t 正交折线；fs/ts 改锚点边；ch 走右侧通道；lbl 边标签 */
+const EDGES = [
+  {f:'A',  t:'RAG'},
+  {f:'RAG',t:'VG0', lbl:'vector'},
+  {f:'RAG',t:'AM0', lbl:'agentic'},
+  {f:'VG0',t:'VG1'},{f:'VG1',t:'VG2'},{f:'VG2',t:'VG3'},{f:'VG3',t:'VG4'},{f:'VG4',t:'VG5'},
+  {f:'AM0',t:'QU1'},{f:'QU1',t:'QU2'},{f:'QU2',t:'QU3'},{f:'QU3',t:'QU4'},{f:'QU4',t:'RT'},
+  {f:'RT',t:'DIR', lbl:'direct'},{f:'RT',t:'PP', lbl:'people'},{f:'RT',t:'TL', lbl:'timeline'},{f:'RT',t:'SUB', lbl:'subtasks'},
+  {f:'PP',t:'X0'},{f:'TL',t:'X0'},
+  {f:'X0',t:'R1', lbl:'people / timeline'},
+  {f:'X0',t:'CF', lbl:'并行副线程'},
+  {f:'R1',t:'R2'},{f:'R2',t:'R3'},{f:'R3',t:'R4'},{f:'R4',t:'R5'},{f:'R5',t:'R6'},
+  {f:'R6',t:'R7', lbl:'输出文本'},
+  {f:'R6',t:'R6R', lbl:'调用另一个工具'},
+  {f:'R6',t:'R8', lbl:'调用 check_chunk'},
+  {f:'R6R',t:'R6F'},
+  {f:'R6F',t:'R7', lbl:'输出文本'},
+  {f:'R6F',t:'R8', lbl:'check_chunk'},
+  {f:'CF',t:'C1', type:'dash', lbl:'结果供兜底'},
+  {f:'R8',t:'C1', type:'dash', fs:'r', ts:'r', ch:1730, lbl:'兜底'},
+  {f:'C1',t:'C2'},{f:'C2',t:'C3'},{f:'C3',t:'C4'},
+  {f:'SUB',t:'O0'},
+  {f:'O0',t:'OP'},{f:'OP',t:'O2'},{f:'O2',t:'O3'},
+  {f:'O3',t:'O4', lbl:'无依赖'},
+  {f:'O3',t:'O5', lbl:'有依赖'},
+  {f:'O4',t:'O8'},
+  {f:'O5',t:'O6'},
+  {f:'O6',t:'O7', lbl:'0 条'},
+  {f:'O6',t:'O8', lbl:'1 / N 条'},
+  {f:'O7',t:'O9'},
+  {f:'O8',t:'O9'},
+  {f:'O9',t:'O2', type:'feedback', fs:'r', ts:'r', ch:2710, lbl:'还有待处理'},
+  {f:'O9',t:'O10', lbl:'队列清空'},{f:'O10',t:'O11'},
+];
+
+const REGIONS = [
+  {x:390,  y:320,  t:'Vector Mode'},
+  {x:1280, y:300,  t:'Agentic · Query Understanding'},
+  {x:1190, y:1220, t:'Structured · Chunk Fallback'},
+  {x:2200, y:1220, t:'Orchestrator'},
+];
+
+/* bar/pill/pt 用于浅色卡；dbar/dpill/dpt 用于深色卡（核心节点），亮色避免半透明叠黑发脏 */
+const ROLE = {
+  lime:  {bar:'var(--lime)',  pill:'var(--lime2)',  pt:'#5c6a14', dbar:'#CBDB63', dpill:'rgba(182,200,73,0.24)', dpt:'#D8E87A'},
+  moss:  {bar:'var(--moss)',  pill:'var(--moss2)',  pt:'#33492c', dbar:'#8FAE7E', dpill:'rgba(139,170,126,0.22)', dpt:'#A9C397'},
+  kombu: {bar:'var(--kombu)', pill:'var(--kombu2)', pt:'#21391f', dbar:'#79A877', dpill:'rgba(121,168,119,0.22)', dpt:'#95BE8E'},
+  cedar: {bar:'var(--cedar)', pill:'var(--cedar2)', pt:'#6e3d22', dbar:'#C68A62', dpill:'rgba(198,138,98,0.24)', dpt:'#D8A57C'},
+  amber: {bar:'var(--amber)', pill:'var(--amber2)', pt:'#7a5606', dbar:'#DEAB3E', dpill:'rgba(222,171,62,0.22)', dpt:'#ECC568'},
+  teal:  {bar:'var(--teal)',  pill:'var(--teal2)',  pt:'#2a4d49', dbar:'#62ABA4', dpill:'rgba(98,171,164,0.22)', dpt:'#82C4BD'},
+  oak:   {bar:'var(--oak)',   pill:'var(--oak2)',   pt:'#6b521f', dbar:'#C4A65C', dpill:'rgba(196,166,92,0.22)', dpt:'#D6BD72'},
+  rust:  {bar:'var(--rust)',  pill:'var(--rust2)',  pt:'#8a4226', dbar:'#CF8E70', dpill:'rgba(207,142,112,0.24)', dpt:'#DCA487'},
+  bark:  {bar:'var(--bark)',  pill:'rgba(122,110,88,0.18)', pt:'#5c5340', dbar:'#9C907A', dpill:'rgba(156,144,122,0.24)', dpt:'#B4A990'},
+};
+
+/* ── 渲染节点 ───────────────────────────────────────── */
+const nodeLayer = document.getElementById('nodeLayer');
+const labelLayer = document.getElementById('labelLayer');
+const svg = document.getElementById('edges');
+const byId = {};
+
+REGIONS.forEach(r => {
+  const el = document.createElement('div');
+  el.className = 'region';
+  el.style.left = r.x + 'px'; el.style.top = r.y + 'px';
+  el.innerHTML = '<span class="r-tick"></span>' + r.t;
+  nodeLayer.appendChild(el);
+});
+
+/* 白卡色标按功能域统一成协调自然色，避免点缀色杂乱 */
+function lbarOf(id) {
+  if (/^VG/.test(id))  return '#5F8079';                          // vector · 灰青
+  if (/^C\d/.test(id)) return '#5E8276';                          // chunk · 苔青
+  if (/^O/.test(id))   return '#84794E';                          // orchestrator · 暖橄榄
+  if (/^R/.test(id) || id === 'X0' || id === 'CF') return '#7E7A45'; // structured · 橄榄
+  return '#94694B';                                               // agentic / route · 雪松褐
+}
+
+NODES.forEach(n => {
+  byId[n.id] = n;
+  const role = ROLE[n.role] || ROLE.bark;
+  const dark = (n.kind === 'core' || n.kind === 'start');
+  const el = document.createElement('div');
+  el.className = 'node';
+  el.style.left = n.x + 'px'; el.style.top = n.y + 'px';
+  let pills = '';
+  if (n.pills) {
+    pills = '<div class="n-pills">' + n.pills.map(p => {
+      const pr = ROLE[p[1]] || ROLE.bark;
+      // 深卡用亮色 pill；白卡 pill 统一中性，把唯一的点缀让给色标
+      const pb = dark ? pr.dpill : 'rgba(28,26,18,0.06)';
+      const pc = dark ? pr.dpt   : 'rgba(28,26,18,0.52)';
+      return `<span class="pill" style="background:${pb};color:${pc};">${p[0]}</span>`;
+    }).join('') + '</div>';
+  }
+  let accentColor;
+  if (dark) accentColor = role.dbar;                 // 关键节点 · 亮色
+  else if (n.kind === 'glass') accentColor = lbarOf(n.id);  // 白卡 · 域色
+  else accentColor = role.bar;                       // 输出绿 / 兜底红 保留语义
+  el.innerHTML = `
+    <div class="card k-${n.kind}" data-id="${n.id}">
+      <div class="n-step">${n.step}</div>
+      <div class="n-title">${n.title}</div>
+      <div class="n-sub">${n.sub}</div>
+      ${pills}
+      <div class="n-accent" style="background:${accentColor}"></div>
+    </div>
+    <div class="node-badge" data-badge="${n.id}"></div>`;
+  nodeLayer.appendChild(el);
+  const card = el.firstElementChild;
+  n._wrap = el; n._el = card; n._badge = el.querySelector('.node-badge');
+  n._w = card.offsetWidth; n._h = card.offsetHeight;
+});
+
+/* ── 正交折线连线 ───────────────────────────────────── */
+function anchor(n, side) {
+  const hw = n._w/2, hh = n._h/2;
+  switch (side) {
+    case 't': return {x:n.x,    y:n.y-hh};
+    case 'b': return {x:n.x,    y:n.y+hh};
+    case 'l': return {x:n.x-hw, y:n.y};
+    case 'r': return {x:n.x+hw, y:n.y};
+  }
+}
+function routePoints(e, a, b) {
+  if (e.ch != null) return [a, {x:e.ch, y:a.y}, {x:e.ch, y:b.y}, b];
+  const fs = e.fs || 'b';
+  if (fs === 'l' || fs === 'r') {
+    if (Math.abs(a.y - b.y) < 1) return [a, b];
+    const mx = (a.x + b.x)/2;
+    return [a, {x:mx, y:a.y}, {x:mx, y:b.y}, b];
+  }
+  if (Math.abs(a.x - b.x) < 1) return [a, b];
+  const my = a.y + (b.y - a.y)*0.5;
+  return [a, {x:a.x, y:my}, {x:b.x, y:my}, b];
+}
+function roundedPath(pts, r) {
+  if (pts.length < 2) return '';
+  if (pts.length === 2) return `M${pts[0].x},${pts[0].y} L${pts[1].x},${pts[1].y}`;
+  let d = `M${pts[0].x},${pts[0].y}`;
+  for (let i = 1; i < pts.length-1; i++) {
+    const p = pts[i], prev = pts[i-1], next = pts[i+1];
+    const d1 = Math.min(r, Math.hypot(p.x-prev.x, p.y-prev.y)/2);
+    const d2 = Math.min(r, Math.hypot(next.x-p.x, next.y-p.y)/2);
+    const u1 = {x:(prev.x-p.x), y:(prev.y-p.y)}, l1 = Math.hypot(u1.x,u1.y)||1;
+    const u2 = {x:(next.x-p.x), y:(next.y-p.y)}, l2 = Math.hypot(u2.x,u2.y)||1;
+    const a = {x:p.x + u1.x/l1*d1, y:p.y + u1.y/l1*d1};
+    const c = {x:p.x + u2.x/l2*d2, y:p.y + u2.y/l2*d2};
+    d += ` L${a.x},${a.y} Q${p.x},${p.y} ${c.x},${c.y}`;
+  }
+  const last = pts[pts.length-1];
+  d += ` L${last.x},${last.y}`;
+  return d;
+}
+
+const DEFS = `<defs>
+<marker id="arr"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L6,3 L0,6 Z" fill="rgba(28,26,18,0.42)"/></marker>
+<marker id="arrA" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L6,3 L0,6 Z" fill="rgba(184,130,10,0.62)"/></marker>
+<marker id="arrT" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L6,3 L0,6 Z" fill="rgba(58,106,102,0.62)"/></marker>
+</defs>`;
+
+function buildEdges() {
+  let paths = '';
+  let labels = '';
+  EDGES.forEach((e, idx) => {
+    const a = anchor(byId[e.f], e.fs || 'b');
+    const b = anchor(byId[e.t], e.ts || 't');
+    const pts = routePoints(e, a, b);
+    const d = roundedPath(pts, 13);
+    const marker = e.type === 'dash' ? 'arrA' : e.type === 'feedback' ? 'arrT' : 'arr';
+    const cls = e.type ? `e-${e.type}` : 'e-norm';
+    paths += `<path class="edge-base ${cls}" data-i="${idx}" d="${d}" marker-end="url(#${marker})"/>`;
+    if (!e.type) paths += `<path class="edge-flow" data-i="${idx}" d="${d}"/>`;
+    if (e.lbl) {
+      const lp = pts.length >= 4
+        ? {x:(pts[1].x+pts[2].x)/2, y:(pts[1].y+pts[2].y)/2}
+        : {x:(pts[0].x+pts[pts.length-1].x)/2, y:(pts[0].y+pts[pts.length-1].y)/2};
+      labels += `<div class="elabel" data-i="${idx}" style="left:${lp.x}px;top:${lp.y}px">${e.lbl}</div>`;
+    }
+  });
+  svg.innerHTML = DEFS + paths;
+  labelLayer.innerHTML = labels;
+}
+buildEdges();
+
+/* 每条边的 DOM 引用（base / flow / label），供生长与折叠统一控制 */
+const edgeEls = EDGES.map((e, idx) => ({
+  base:  svg.querySelector(`.edge-base[data-i="${idx}"]`),
+  flow:  svg.querySelector(`.edge-flow[data-i="${idx}"]`),
+  label: labelLayer.querySelector(`.elabel[data-i="${idx}"]`),
+}));
+
+/* ── 拓扑：邻接表 + 可达性 + 独占下游计数 ─────────────── */
+const childEdges = {};
+EDGES.forEach((e, idx) => { (childEdges[e.f] = childEdges[e.f] || []).push({ idx, v: e.t }); });
+
+// 从 A 出发的可达集；blocked 里的节点是折叠根，不展开其出边
+function reachable(blocked) {
+  const vis = new Set(['A']); const q = ['A'];
+  while (q.length) {
+    const u = q.shift();
+    if (blocked.has(u)) continue;
+    (childEdges[u] || []).forEach(({ v }) => { if (!vis.has(v)) { vis.add(v); q.push(v); } });
+  }
+  return vis;
+}
+// 每个节点独占的下游数量 = 总数 − 单独折叠它之后还能到达的数量
+const TOTAL = NODES.length;
+const exCount = {};
+NODES.forEach(n => { exCount[n.id] = TOTAL - reachable(new Set([n.id])).size; });
+
+/* ── 藤蔓生长入场 ─────────────────────────────────────
+   从第一个节点出发，按真实拓扑逐级蔓延：父节点到达后其出边才开始生长，
+   藤蔓尖端触及子节点的瞬间子节点才内敛浮现，边标签随对应边长完才淡入。 */
+function animateGrowth() {
+  const SPEED = 0.5, GAP = 55, MINDUR = 175;   // 调慢节奏，做出生长而非抽纸的感觉
+  const L = edgeEls.map(x => x.base ? x.base.getTotalLength() : 0);
+  const growDur = i => Math.max(MINDUR, L[i] * SPEED);
+
+  // 级联到达时间：迭代松弛（图含回环，不能纯拓扑排序；feedback 边不传播到达）
+  const arrive = { A: 0 };
+  const eStart = new Array(EDGES.length).fill(null);
+  for (let it = 0; it < NODES.length + 2; it++) {
+    let changed = false;
+    EDGES.forEach((e, i) => {
+      if (e.type === 'feedback') return;
+      const au = arrive[e.f]; if (au == null) return;
+      if (eStart[i] == null || au < eStart[i]) { eStart[i] = au; changed = true; }
+      const rv = au + growDur(i) + GAP;
+      if (arrive[e.t] == null || rv < arrive[e.t]) { arrive[e.t] = rv; changed = true; }
+    });
+    if (!changed) break;
+  }
+  EDGES.forEach((e, i) => { if (eStart[i] == null) eStart[i] = (arrive[e.f] != null ? arrive[e.f] : 0); });
+
+  let maxEnd = 0;
+  EDGES.forEach((e, i) => {
+    const p = edgeEls[i].base; if (!p) return;
+    const len = L[i], dur = growDur(i), delay = eStart[i];
+    const mk = p.getAttribute('marker-end');
+    p.removeAttribute('marker-end');             // 生长途中不显示箭头
+    p.style.strokeDasharray = len + ' ' + len;
+    p.style.strokeDashoffset = len;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      p.style.transition = `stroke-dashoffset ${dur}ms cubic-bezier(0.37,0,0.4,1) ${delay}ms`;
+      p.style.strokeDashoffset = '0';
+    }));
+    const end = delay + dur;
+    maxEnd = Math.max(maxEnd, end);
+    setTimeout(() => {
+      p.style.transition = ''; p.style.strokeDasharray = ''; p.style.strokeDashoffset = '';
+      if (mk) p.setAttribute('marker-end', mk);
+      if (edgeEls[i].label) edgeEls[i].label.classList.add('show');  // 边长到位标签才淡入
+    }, end + 30);
+  });
+
+  NODES.forEach(n => {                            // 节点紧跟藤蔓尖端浮现
+    const t = arrive[n.id] != null ? arrive[n.id] : 0;
+    setTimeout(() => { if (n._el) n._el.classList.add('shown'); }, t);
+  });
+
+  setTimeout(() => {
+    document.querySelectorAll('.edge-flow').forEach(f => f.classList.add('live'));
+    document.querySelectorAll('.k-core, .k-out').forEach(c => c.classList.add('live'));
+  }, maxEnd + 200);
+}
+requestAnimationFrame(() => {
+  try { animateGrowth(); }
+  catch (err) {
+    // 兜底：动画异常也保证节点、连线、标签全部可见，绝不留白屏
+    NODES.forEach(n => n._el && n._el.classList.add('shown'));
+    document.querySelectorAll('.edge-flow, .k-core, .k-out').forEach(c => c.classList.add('live'));
+    document.querySelectorAll('.elabel').forEach(l => l.classList.add('show'));
+  }
+});
+
+/* ── 折叠 / 展开 ──────────────────────────────────────
+   右键节点折叠它独占的下游（合流节点不误伤）；折叠根显示 +N 角标。 */
+const collapsed = new Set();
+function applyVisibility() {
+  const vis = reachable(collapsed);
+  NODES.forEach(n => n._wrap.classList.toggle('collapsed-hidden', !vis.has(n.id)));
+  EDGES.forEach((e, idx) => {
+    const show = vis.has(e.f) && !collapsed.has(e.f) && vis.has(e.t);
+    const els = edgeEls[idx];
+    els.base  && els.base.classList.toggle('ehidden', !show);
+    els.flow  && els.flow.classList.toggle('ehidden', !show);
+    els.label && els.label.classList.toggle('ehidden', !show);
+  });
+  NODES.forEach(n => {
+    const on = collapsed.has(n.id) && vis.has(n.id) && exCount[n.id] > 0;
+    if (on) { n._badge.textContent = '+' + exCount[n.id]; n._badge.classList.add('on'); }
+    else n._badge.classList.remove('on');
+  });
+}
+function toggleCollapse(id) {
+  if (exCount[id] <= 0) return;                  // 叶子无下游，不可折叠
+  if (collapsed.has(id)) collapsed.delete(id); else collapsed.add(id);
+  applyVisibility();
+}
+function collapseAll() {
+  collapsed.clear();
+  NODES.forEach(n => { if (exCount[n.id] > 0) collapsed.add(n.id); });  // 逐层折叠，只留起点
+  applyVisibility();
+}
+function expandAll() { collapsed.clear(); applyVisibility(); }
+
+/* ── 平移缩放 ───────────────────────────────────────── */
+const viewport = document.getElementById('viewport');
+const canvas = document.getElementById('canvas');
+const CONTENT = {x:230, y:10, w:2560, h:2440};
+let tx=0, ty=0, scale=1;
+
+function apply() { canvas.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; }
+function fit() {
+  const vw = innerWidth, vh = innerHeight;
+  scale = Math.min(vw/CONTENT.w, vh/CONTENT.h) * 0.92;
+  tx = (vw - CONTENT.w*scale)/2 - CONTENT.x*scale;
+  ty = (vh - CONTENT.h*scale)/2 - CONTENT.y*scale + 12;
+  apply();
+}
+fit();
+
+function zoomAt(mx, my, factor) {
+  const ns = Math.max(0.25, Math.min(2.4, scale*factor));
+  const k = ns/scale;
+  tx = mx - (mx - tx)*k;
+  ty = my - (my - ty)*k;
+  scale = ns; apply();
+}
+viewport.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = viewport.getBoundingClientRect();
+  zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? 1.12 : 0.893);
+}, {passive:false});
+
+let down=false, moved=false, sx=0, sy=0, tx0=0, ty0=0, downTarget=null;
+viewport.addEventListener('pointerdown', e => {
+  if (e.button !== 0) return;                     // 只左键参与拖拽 / 点击，右键留给折叠
+  down=true; moved=false; sx=e.clientX; sy=e.clientY; tx0=tx; ty0=ty;
+  downTarget = e.target;
+  viewport.classList.add('grabbing');
+  viewport.setPointerCapture(e.pointerId);
+});
+viewport.addEventListener('pointermove', e => {
+  if (!down) return;
+  const dx=e.clientX-sx, dy=e.clientY-sy;
+  if (Math.hypot(dx,dy) > 4) moved=true;
+  tx = tx0+dx; ty = ty0+dy; apply();
+});
+viewport.addEventListener('pointerup', e => {
+  if (e.button !== 0) return;
+  down=false; viewport.classList.remove('grabbing');
+  if (!moved && downTarget) {
+    const badge = downTarget.closest('.node-badge');
+    if (badge && badge.classList.contains('on')) { toggleCollapse(badge.dataset.badge); downTarget = null; return; }
+    const card = downTarget.closest('.card');
+    if (card) openDrawer(card.dataset.id);        // 左键 · 看抽屉详情
+  }
+  downTarget = null;
+});
+// 右键节点 · 折叠 / 展开其独占下游
+viewport.addEventListener('contextmenu', e => {
+  const card = e.target.closest('.card');
+  if (card) { e.preventDefault(); toggleCollapse(card.dataset.id); }
+});
+
+document.getElementById('zin').onclick   = () => zoomAt(innerWidth/2, innerHeight/2, 1.2);
+document.getElementById('zout').onclick  = () => zoomAt(innerWidth/2, innerHeight/2, 0.833);
+document.getElementById('zhome').onclick = fit;
+document.getElementById('expandAll').onclick   = expandAll;
+document.getElementById('collapseAll').onclick = collapseAll;
+addEventListener('resize', fit);
+
+/* ── 抽屉 ───────────────────────────────────────────── */
+const BODIES = {
+A: `<p class="d-lead">整个流程的<b>入口</b>。接收用户的原始问题 <span class="d-k">raw_query</span>，连同对话历史 <span class="d-k">history</span> 一起进入系统。</p>
+<div class="d-rows">
+<div class="d-row"><div class="rk">raw_query</div><div class="rv">用户的原始问题文本</div></div>
+<div class="d-row"><div class="rk">history</div><div class="rv">上一轮 user / assistant 消息组成的列表</div></div>
+</div>
+<div class="d-note">history 为空列表时，直接用 raw_query 做意图识别，<b>跳过指代消解</b>，避免不必要的 LLM 调用。</div>`,
+
+RAG: `<p class="d-lead">系统总入口 <span class="d-k">rag.py</span>，函数签名 <span class="d-k">Agentic_RAG(query, mode, history)</span>，按 mode 把请求分发到两条完全不同的路径。</p>
+<div class="d-sec-l">分发</div>
+<div class="d-rows">
+<div class="d-row"><div class="rk">mode = vector</div><div class="rv">纯代码 chunk 检索，无 LLM、无历史，快速返回 top-k</div></div>
+<div class="d-row"><div class="rk">mode = agentic</div><div class="rv">受控 LLM 规划 + 并行证据检索</div></div>
+</div>
+<div class="d-note">V2 核心原则 — <b>LLM 理解语言并填写受约束的计划</b>，而路由合法性、schema 合法性、证据池管理和失败控制全部由代码负责。</div>`,
+
+VG0: `<p class="d-lead">这是 Vector 模式的起点。把用户问题装进一个状态对象就交给检索流程，<b>全程没有大模型参与</b>，纯代码跑完。</p>
+<div class="d-note">Vector 模式无 LLM 调用、不读对话历史，适合"书里某段话怎么写的"这种直接召回原文就能答的题。<span class="ref">build.py:42</span></div>`,
+
+VG1: `<p class="d-lead">检索流程被编译成一张 <b>LangGraph 流程图</b>再执行。Vector 模式这张图很简单，只有一个检索节点，状态里就装两样东西：用户问题、检到的原文段落。<span class="ref">build.py:42</span></p>
+<div class="d-note">不只 Vector，整个 Agentic 模式也都跑在 LangGraph 上，那是另一张更复杂的图（理解 → 路由 → 检索 / 编排）。</div>`,
+
+VG2: `<p class="d-lead">这张图里唯一干活的节点：拿用户问题去底层检索组件捞原文段落，结果写回状态就结束。<span class="ref">build.py:27</span></p>`,
+
+VG3: `<p class="d-lead">召回原文的核心，<b>四步走</b>，全部在 <span class="ref">chunk_rrf.py</span> 里。两路一起查、融合、再精排，是为了把"语义像"和"关键词命中"两种长处都吃到。</p>
+<ul class="d-ul">
+<li><b>① 双路编码</b> · 一次模型前向同时拿到稠密向量和稀疏权重 <span class="ref">chunk_rrf.py:226</span></li>
+<li><b>② 两路检索</b> · 稠密走语义相似、稀疏走关键词命中，各召回 30 条候选 <span class="ref">chunk_rrf.py:252</span></li>
+<li><b>③ RRF 融合</b> · 把两路排名按倒数加权合到一起 <span class="ref">chunk_rrf.py:286</span></li>
+<li><b>④ Reranker 精排</b> · 用专门的精排模型在融合池上重新打分，取最高的 10 条 <span class="ref">chunk_rrf.py:385</span></li>
+</ul>
+<h4 class="code">代码约束 · 两道阈值卡质量</h4>
+<p>稀疏检索时，权重太低的虚词（"的""有""哪些"）直接不参与搜索，省开销 <span class="ref">settings.py:72</span><span class="ref">chunk_rrf.py:373</span>。精排完如果最高分都低于 0.05，判定"压根没有相关内容"，直接返回空，绝不硬凑 <span class="ref">settings.py:77</span><span class="ref">chunk_rrf.py:398</span>。</p>`,
+
+VG4: `<p class="d-lead">拿到原文段落后让大模型组织成回答，<b>每句话末尾标上它依据的原文编号</b>（chunk_id），答案因此可以一句句溯源。</p>
+<h4 class="prompt">提示词约束 · 只准照着原文说</h4>
+<p>系统提示词把模型当成"只能看到这几段、对历史毫无先验的失忆读者"，没出现在段落里的内容一律不准写，每条事实句末必须挂 chunk_id。<span class="ref">route_task.py:36</span></p>
+<details class="d-exp"><summary>提示词原文片段</summary><div class="exp-in"><div class="src">- 每一条事实/陈述句末必须跟 [chunk_id=N]，N 为段落标题中显示的 chunk_id。
+- 没有 chunk_id 锚定的内容严禁写出。
+- 找不到答案：只输出"根据现有资料，无法回答此问题。"</div></div></details>
+<h4 class="code">代码约束 · 引用必须真实</h4>
+<p>提示词只是嘱咐，最后由代码兜底：答案生成后，代码把里面所有 chunk_id 抠出来跟这次真实检到的段落核对，只要有一个对不上就判定幻觉，整条答案作废改成拒答。<span class="ref">route_task.py:160</span></p>`,
+
+VG5: `<p class="d-lead">返回精排后的 <b>前 10 段原文</b>作为答案，毫秒级、零大模型成本。</p>
+<div class="d-note">全程不碰意图识别、人物 / 时间线工具和推理 agent，所以又快又省，也常用来给 Agentic 模式当检索质量的对照基线。<span class="ref">settings.py:59</span></div>`,
+
+AM0: `<p class="d-lead">Agentic 模式的总入口。它用<b>受控的大模型规划</b>加并行证据检索，专门啃 Vector 模式啃不动的题：枚举（有哪些）、多条件交叉、按时间排序、多跳追问。<span class="ref">agentic_mode.py:10</span></p>
+<div class="d-note">整条链路的核心分工：<b>大模型只负责理解语言、做判断</b>，凡是能写成规则的（格式、参数范围、引用核对）全由代码兜底。</div>`,
+
+QU1: `<p class="d-lead">Agentic 的第一站，只干<b>三件事</b>：把"他 / 这些"这类指代还原成具体对象、把一句话里的多个问题拆成子任务、判断每个子任务该走哪条检索线。</p>
+<div class="d-note">它<b>故意不碰具体检索参数</b>，只专注理解问题；参数留到后面对应的检索节点再填，免得一个节点既要理解又要填参数、容易顾此失彼。<span class="ref">query_understanding.py:86</span></div>`,
+
+QU2: `<p class="d-lead">理解问题靠的是一份外置的指令文件（skill），节点启动时读进来当系统提示词喂给大模型。<span class="ref">query_understanding.py:17</span></p>
+<h4 class="prompt">提示词约束 · 强制只输出 JSON</h4>
+<p>这份指令开头就把输出格式钉死：第一个字符必须是 <code>{</code>、最后一个是 <code>}</code>，不准有任何解释、道歉或 markdown 标记。</p>
+<details class="d-exp"><summary>提示词原文片段</summary><div class="exp-in"><div class="src">你的输出必须是且仅是合法 JSON 对象，严禁包含任何 JSON 以外的内容。
+禁止输出解释、道歉、markdown 代码块标记，直接输出 JSON，
+第一个字符是 {，最后一个字符是 }。</div></div></details>
+<div class="d-note">但提示词只是"嘱咐"，不是保险。真正卡死合法性的是后面那道代码校验（见"代码校验计划合法性"节）。</div>`,
+
+QU3: `<p class="d-lead">大模型在<b>强制 JSON 模式</b>下吐出一份"查询计划"，描述这道题该怎么查。下面三样是计划里的字段：<span class="ref">query_understanding.py:104</span></p>
+<div class="d-rows">
+<div class="d-row"><div class="rk">还原后的问题</div><div class="rv">把指代换成具体对象后的问题；没有历史时就等于原问题</div></div>
+<div class="d-row"><div class="rk">单任务 / 多任务</div><div class="rv">这道题要不要拆成多个子任务</div></div>
+<div class="d-row"><div class="rk">子任务清单</div><div class="rv">每条带：编号、问题、答案性质、走哪条检索线、依赖谁</div></div>
+</div>`,
+
+QU4: `<p class="d-lead">这是 Agentic 模式里<b>最能体现"代码兜底"的一步</b>。大模型吐出查询计划后，不是直接信，而是过一道代码校验；任何一条不合规，就把错误原文塞回去让同一个大模型重写，<b>最多重试 2 次</b>，3 次还不行直接报错。<span class="ref">query_understanding.py:86</span></p>
+<h4 class="code">代码约束 · 逐条硬校验</h4>
+<ul class="d-ul">
+<li><b>问题非空</b> · 还原后的问题必须存在且非空</li>
+<li><b>类型合法</b> · 只能是"单任务"或"多任务"</li>
+<li><b>条数匹配</b> · 单任务恰好 1 条，多任务至少 2 条</li>
+<li><b>编号连续</b> · 任务号从 t1 起连续，不许跳号</li>
+<li><b>取值在表内</b> · 答案性质、检索意图都只能取固定枚举值</li>
+<li><b>依赖合法</b> · 依赖的任务必须真实存在、且排在自己前面</li>
+</ul>
+<p style="font-size:11.5px;color:var(--t3)">规则实现 <span class="ref">query_understanding.py:29</span> · 重试循环 <span class="ref">query_understanding.py:112</span></p>
+<div class="d-note">为什么不靠提示词写一句"请严格按格式"就完事？因为大模型输出是概率性的，总会偶尔跑偏；把"格式对不对"交给确定性的代码判断，才是真正可靠的那道关。</div>`,
+
+RT: `<p class="d-lead">问题理解完之后，系统<b>按问题类型自动分流</b>：单任务直接下发到对应检索线，多任务交给编排器拆解调度。这一步是代码里的条件判断，不额外花一次大模型调用。<span class="ref">build.py:117</span></p>
+<div class="d-sec-l">三条检索意图</div>
+<div class="d-rows">
+<div class="d-row"><div class="rk">人物线</div><div class="rv">答案由人物、别名、身份、关系驱动</div></div>
+<div class="d-row"><div class="rk">时间线</div><div class="rv">答案由事件、年份、先后顺序、时段驱动</div></div>
+<div class="d-row"><div class="rk">直接回复</div><div class="rv">闲聊感叹类，不需要检索，直接答</div></div>
+</div>
+<div class="d-note">每个子任务还带一个"答案性质"标签（事实 / 分析 / 枚举），决定它是查一路证据就够，还是要合并多路再下结论。</div>`,
+
+DIR: `<p class="d-lead">遇到闲聊、感叹、评论这类不需要查资料的话，<b>整条检索流程全部跳过</b>，大模型直接基于对话历史回一句。<span class="ref">route_task.py:255</span></p>
+<h4 class="prompt">提示词约束 · 不准凭空编 id</h4>
+<p>直接回复时如果用户在追问前文事实，提示词要求复用历史里已经出现过的引用编号，绝不准现编一个新的 id。<span class="ref">route_task.py:92</span></p>
+<div class="d-note">例：用户说「朱元璋也太厉害了！」——这种没有检索必要，直接接话即可。</div>`,
+
+PP: `<p class="d-lead">问人物、别名、身份、关系这类问题走这条线。主力是<b>结构化检索</b>（在人物知识图谱上按字段精确过滤），结构化查不全时自动用原文 chunk 兜底。<span class="ref">route_task.py:191</span></p>
+<h4 class="code">设计取舍 · 这里为什么不用向量检索</h4>
+<p>人物类问题都有明确的结构化锚点（人名、别名、职衔、身份类别），用知识图谱的 JSON 字段做正则精确过滤又准又稳；向量检索擅长"语义像"，反而容易把不相关的人也召回来。真有结构化覆盖不到的盲区，再由并行的 chunk 分支查原文补上，比向量搜人物摘要信息更完整。<span class="ref">people_store.py</span><span class="ref">route_people.py:398</span></p>`,
+
+TL: `<p class="d-lead">问事件、年份、先后顺序、时间跨度这类问题走这条线，结构化检索与原文 chunk <b>双路并行</b>。<span class="ref">route_task.py:223</span></p>
+<h4 class="code">设计取舍 · 这里为什么不用向量检索</h4>
+<p>向量检索只懂"语义相近"，对"哪年发生""谁先谁后""隔了几年"这种精确时间推理完全无能为力。时间线问题都有结构化锚点（事件名、年号、公元年、参与人物），用知识图谱做精确匹配才答得准。<span class="ref">timeline_store.py</span><span class="ref">route_timeline.py:280</span></p>`,
+
+SUB: `<p class="d-lead">一句话里问了好几件事、或者后一问要等前一问的答案，就判定为多任务，拆成多条子任务交给<b>编排器</b>按依赖关系调度（详见 Orchestrator 区）。<span class="ref">orchestrator.py:196</span></p>
+<div class="d-note">为什么要拆？因为让一个大模型在一个长问题里同时做拆解、检索、筛选、综合，最容易漏项、重复、把摘要当证据。拆开一条条调度，每步只干一件事，才稳。</div>`,
+
+X0: `<p class="d-lead">人物线和时间线的执行器，一进来就<b>开两条线同时跑</b>：主线程去做结构化检索，与此同时一个副线程立刻在后台预跑原文 chunk 检索。<span class="ref">route_task.py:191</span></p>
+<div class="d-note">这样安排是为了省等待：万一结构化检索不够、需要回退到原文兜底，那份原文结果这时早就跑好了，不用现等。</div>`,
+
+CF: `<p class="d-lead">主线程刚开始做结构化检索的<b>同一时刻</b>，副线程就已经把原文检索发出去了，两件事真正并行，不是一前一后。<span class="ref">route_task.py:201</span></p>
+<div class="d-note">等结构化那边判定"我答不全，需要原文兜底"时，原文结果<b>几乎已经就绪</b>，几乎没有额外等待。</div>`,
+
+R1: `<p class="d-lead">结构化检索这一路本身也是一张小流程图，把"选工具 → 执行 → 判断够不够 → 不够换个工具再试 → 还不够走兜底"拆成一串节点。人物线和时间线各一张，结构几乎一样。<span class="ref">route_people.py:398</span><span class="ref">route_timeline.py:280</span></p>
+<div class="d-rows">
+<div class="d-row"><div class="rk">人物线</div><div class="rv">最多三次大模型调用，第二次会换工具重试</div></div>
+<div class="d-row"><div class="rk">时间线</div><div class="rv">两次大模型调用，没有换工具这一步</div></div>
+</div>`,
+
+R2: `<p class="d-lead">节点先读一份外置指令（skill），教大模型这条线该怎么选工具、怎么填参数、拿到结果怎么判断够不够。</p>
+<h4 class="prompt">提示词约束</h4>
+<p>人物线读 <code>people_plan.md</code>、时间线读 <code>timeline_plan.md</code>，里面写满了选工具的规则和正反例，但它只是"教学"，真正卡死参数合法性的是工具签名本身（见下一节）。</p>`,
+
+R3: `<p class="d-lead">第一次大模型调用：让它从这条线的工具里挑一个，并把参数填好。挑哪个、怎么填，是大模型的判断。<span class="ref">route_people.py:202</span></p>`,
+
+R4: `<p class="d-lead">执行大模型选中的工具，在知识图谱（JSON）上做<b>正则过滤和精确匹配</b>，不是向量相似度。</p>
+<ul class="d-ul">
+<li><b>查人物档案</b> · 三层依次收窄：年号（任一命中）→ 身份大类（精确）→ 人名别名职衔（正则） <span class="ref">people_tools.py:17</span></li>
+<li><b>查人物关系</b> · 主体必填、目标可选，先定位主体再过滤关系条目 <span class="ref">people_tools.py:54</span></li>
+<li><b>查事件</b> · 四个参数之间取交集、列表内部取并集：事件词 / 年号 / 公元年 / 参与人 <span class="ref">timeline_tools.py:16</span></li>
+</ul>
+<h4 class="code">代码约束 · 参数只能取表内值</h4>
+<p>年号、身份大类这些参数只能从固定枚举里选，大模型填了表外的值，数据层会直接剔除并打日志报警，不让一个填错的参数悄悄把结果查空。<span class="ref">people_store.py</span></p>`,
+
+R5: `<p class="d-lead">工具查到的结果回流给大模型阅读、判断够不够回答。</p>
+<div class="d-note"><b>结果太长会截断</b>：喂给大模型的工具结果以约 9 万字符（约 3 万 token）为上限，超出自动截断并附提示，避免一次塞爆上下文。<span class="ref">route_people.py:232</span></div>`,
+
+R6: `<p class="d-lead">第二次大模型调用，是这条线的<b>决策分岔点</b>。这次给它绑的工具是"第一次没用过的那个 + 一个兜底信号"，逼它三选一：<span class="ref">route_people.py:251</span></p>
+<ul class="d-ul">
+<li><b>能答了</b> → 直接输出文本答案</li>
+<li><b>想换个角度查</b> → 调用另一个工具，执行后进第三次最终判断</li>
+<li><b>查不到</b> → 调用 check_chunk 兜底信号，转交原文分支</li>
+</ul>
+<div class="d-note">绑定时<b>故意不给它第一次用过的工具</b>，强制它换检索维度（比如从"查档案"换成"查关系网"），而不是用同样的方式重查一遍。</div>`,
+
+R6R: `<p class="d-lead">第二次判断决定"换个工具再查一轮"时走这里：执行那个没用过的工具，再进第三次最终判断。<span class="ref">route_people.py:288</span></p>
+<div class="d-note">只有<b>人物线</b>有这步换工具重试（人物有"查档案/查关系"两个工具可换）；时间线只有一个工具，没有这一步。</div>`,
+
+R6F: `<p class="d-lead">第三次（也是最后一次）大模型判断，只在换过工具之后才出现。这次只给它兜底信号：要么给出答案，要么承认查不到、走原文兜底。<span class="ref">route_people.py:308</span></p>`,
+
+R7: `<p class="d-lead">结构化检索够用时的<b>直接答案</b>，每处引用都带上来源编号（人物 id / 事件 id），可以一条条溯源。</p>
+<h4 class="code">代码约束 · 引用必须真实存在</h4>
+<p>这是防幻觉的关键一步：答案生成后，代码把里面引用的每个 id 抠出来，跟这一轮工具<b>真实返回过的 id</b>核对，只要有一个对不上就判定编造，整条答案作废改成拒答，并打可审计的报警日志。<span class="ref">route_people.py:181</span></p>`,
+
+R8: `<p class="d-lead">check_chunk 是一个<b>纯信号工具</b>：不接受任何参数、不做任何检索，被调用就只代表一件事——"我手上的结构化结果不够，请走原文兜底"。<span class="ref">people_tools.py:80</span></p>
+<div class="d-note rust">一旦被调用，这条线返回空，转交那个<b>早就在后台跑完</b>的原文检索结果去合成答案。人物线和时间线复用同一份 check_chunk 定义。<span class="ref">people_tools.py:95</span></div>`,
+
+C1: `<p class="d-lead">原文兜底分支的入口。那个在后台<b>早就跑完</b>的原文检索结果在这里汇入；结构化那边一旦发出"我不够"的兜底信号，也是转到这里。<span class="ref">route_task.py:201</span></p>`,
+
+C2: `<p class="d-lead">把召回的原文段落打一份摘要到日志（编号、精排分、融合分），方便诊断这次检索质量好不好。</p>`,
+
+C3: `<p class="d-lead"><b>只准照着召回的原文段落回答</b>，不引入段落以外的任何知识。如果结构化那边也确认了一部分，会把两边证据合并起来一起喂给大模型。<span class="ref">route_task.py:104</span></p>
+<div class="d-note">原文 chunk 是最原始的文本，信息比知识图谱里那份提炼过的摘要更完整，所以兜底答案往往反而比结构化答案更细。</div>`,
+
+C4: `<p class="d-lead">原文兜底的最终答案，<b>每句末尾带原文编号</b>溯源；如果知识库里确实没有，就老实说"根据现有资料无法回答"，绝不硬编。<span class="ref">route_task.py:41</span></p>
+<h4 class="code">代码约束 · 引用真实性同样兜底</h4>
+<p>和结构化答案一样，这条兜底答案生成后也会被代码核对：里面的原文编号必须都来自这次真实召回的段落，对不上就整条作废改成拒答。<span class="ref">route_task.py:160</span></p>`,
+
+O0: `<p class="d-lead">只在多任务时才介入，单任务直通不经过它。它处理两类难题：一句话问了好几件事（并行），或者后一问要等前一问的答案（依赖）。<span class="ref">orchestrator.py:49</span></p>
+<div class="d-note">整个编排器是一张<b>可以循环的 LangGraph 流程图</b>（调度、执行、汇总三类节点轮流推进），核心是 <b>2 次大模型调用</b>（解引用 + 终答合成）加上运行时<b>动态把一个任务扩散成多个并行子任务</b>，本身不直接调用检索工具。<span class="ref">orchestrator.py:196</span></div>`,
+
+OP: `<p class="d-lead">一个<b>贯穿所有轮次</b>的全局答案池，所有子任务的结果都往里写，按任务编号归类，最后一次性取出合成终答。</p>
+<h4 class="code">代码约束 · 并行写入不能互相覆盖</h4>
+<p>多个子任务是并行同时跑完的，会同时往答案池写。如果用默认的"后写覆盖先写"，结果就丢了。所以这个池子挂了一个专门的合并规则：按任务编号把各路结果<b>拼接</b>起来而不是覆盖。<span class="ref">state.py:10</span><span class="ref">state.py:73</span></p>`,
+
+O2: `<p class="d-lead">每轮挑出<b>可以跑的任务</b>：它依赖的上游任务结果已经全部在答案池里了。<span class="ref">orchestrator.py:68</span></p>`,
+
+O3: `<p class="d-lead">看这个任务<b>要不要等上游答案</b>：不依赖谁就直接跑，依赖别人就得先做解引用。<span class="ref">orchestrator.py:84</span></p>`,
+
+O4: `<p class="d-lead">没有前置依赖的任务，<b>直接同时并行发出</b>，不需要先做解引用。<span class="ref">orchestrator.py:84</span></p>`,
+
+O5: `<p class="d-lead">有依赖的任务，先读取上游答案池的内容，注入之后再交给解引用步骤展开。<span class="ref">orchestrator.py:224</span></p>`,
+
+O6: `<p class="d-lead">这是依赖型任务的关键一步：一次大模型调用<b>同时干三件事</b>，把一个还说不清的下游任务变成 0 条、1 条、或 N 条能直接执行的具体问题。<span class="ref">orchestrator.py:224</span></p>
+<ul class="d-ul">
+<li><b>指代还原</b> · 把下游问题里的"他 / 这些 / 各自 / 此人"换成上游答案里的具体名字</li>
+<li><b>枚举增生</b> · 上游答出了 N 个东西，就把下游裂变成 N 条并行子问题（这就是"数量运行时才知道"的扩散）</li>
+<li><b>阻塞判定</b> · 上游答的是"无法回答"，那下游没法做，返回空、标记为阻塞</li>
+</ul>`,
+
+O7: `<p class="d-lead">上游答案是失败标志时，解引用返回<b>空列表</b>，这个任务不执行，直接往池里放一条"无法回答"的占位。<span class="ref">orchestrator.py:91</span></p>
+<div class="d-note rust"><b>阻塞会自动传染</b>：如果 t3 依赖 t2、而 t2 被阻塞了，t3 读到的全是失败标志，于是 t3 也会被标阻塞。阻塞沿依赖链一路向下传，不需要额外写逻辑。</div>`,
+
+O8: `<p class="d-lead">把这一轮所有解引用后的子问题拼成一个列表，<b>一次性同时并行发出</b>，各自按问题类型走对应检索路径。这就是运行时的动态扩散。<span class="ref">orchestrator.py:157</span></p>`,
+
+O9: `<p class="d-lead">每个并行任务跑完，结果<b>按父任务编号归类</b>写回答案池（用前面说的拼接规则，不覆盖）。<span class="ref">orchestrator.py:127</span></p>
+<div class="d-note">还有没跑的任务就回到"挑任务"再来一轮；全部跑完就进入终答合成。答案池自始至终只有一个，贯穿所有轮次。</div>`,
+
+O10: `<p class="d-lead">所有子任务都跑完、答案池填满之后，交给最后的终答合成。<span class="ref">orchestrator.py:142</span></p>`,
+
+O11: `<p class="d-lead">整个流程末尾调一次大模型：喂进用户原问题 + 池里所有"任务和它的答案" + 阻塞清单，合成一段连贯回答。<span class="ref">orchestrator.py:320</span></p>
+<h4 class="code">代码约束 · 终答也要核对引用</h4>
+<p>合成时<b>保留全部来源编号</b>（chunk_id / event_id / people_id），对阻塞的部分老实说"根据现有资料无法回答 X"，不假装答了也不跳过。生成后代码再逐类核对一遍这些编号是否都来自子任务真实给出的证据，对不上就拒答。<span class="ref">orchestrator.py:320</span></p>`,
+};
+
+const DATA = {};
+NODES.forEach(n => {
+  const role = ROLE[n.role] || ROLE.bark;
+  DATA[n.id] = {
+    badge: n.step, bc: role.pill, bt: role.pt,
+    title: n.title, sub: n.sub,
+    body: BODIES[n.id] || `<div class="ph"><b>${n.title}</b> · ${n.sub}</div>`
+  };
+});
+
+const drawer = document.getElementById('drawer');
+function clearSelected() {
+  document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
+}
+function openDrawer(id) {
+  const d = DATA[id]; if (!d) return;
+  const b = document.getElementById('d-badge');
+  b.textContent = d.badge; b.style.background = d.bc; b.style.color = d.bt;
+  document.getElementById('d-title').textContent = d.title;
+  document.getElementById('d-sub').textContent = d.sub;
+  document.getElementById('d-body').innerHTML = d.body;
+  document.getElementById('d-body').scrollTop = 0;
+  clearSelected();
+  if (byId[id] && byId[id]._el) byId[id]._el.classList.add('selected');
+  drawer.classList.add('open');
+}
+function closeDrawer() { drawer.classList.remove('open'); clearSelected(); }
+
+document.getElementById('d-close').onclick = closeDrawer;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+</body>
+</html>
